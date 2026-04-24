@@ -211,6 +211,7 @@
 
     <div id="score-screen" class="screen">
         <h2>TJ Dailies Complete!</h2>
+        <p id="daily-date-display" style="color: var(--btn-normal); font-weight: bold; margin-top: 5px; font-size: 1.1em;"></p>
         
         <p style="color: var(--text-muted); margin-top: 30px;">Your Total Score</p>
         <div id="final-score" class="huge-score">0</div>
@@ -530,6 +531,11 @@
         function showScoreScreen() {
             let savedScore = localStorage.getItem("tjdle_daily_score") || "0";
             let savedHistory = localStorage.getItem("tjdle_daily_history") || "00000";
+            
+            // NEW LINES ADDED HERE TO FORMAT THE DATE
+            let options = { timeZone: "Asia/Singapore", year: 'numeric', month: 'long', day: 'numeric' };
+            let readableDate = new Intl.DateTimeFormat('en-US', options).format(new Date());
+            document.getElementById("daily-date-display").innerText = readableDate;
             
             document.getElementById("final-score").innerText = savedScore;
             document.getElementById("daily-code").innerText = savedHistory;
