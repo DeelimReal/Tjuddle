@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TJdle 2025</title>
     <style>
-        /* Dark Mode Theme Variables */
+        /* Beige Theme Variables */
         :root {
-            --bg-color: #121212;
-            --text-main: #e0e0e0;
-            --text-muted: #888888;
-            --box-bg: #1e1e1e;
-            --border-color: #333333;
+            --bg-color: #f0e6d2; /* Warm beige background */
+            --text-main: #3d3830; /* Warm dark brown/grey text for readability */
+            --text-muted: #7a7369; /* Softer brownish-gray for subtitles */
+            --box-bg: #fdfaf4; /* Slight off-white for input/result boxes */
+            --border-color: #d1c7b4; /* Beige-tinted borders */
             --btn-easy: #2e7d32;
             --btn-normal: #1976d2;
             --btn-hard: #c62828;
             --btn-daily: #8e24aa;
-            --btn-giveup: #555555;
-            --btn-reset: #fbc02d;
-            --win-color: #4caf50;
+            --btn-giveup: #7d7465; /* Warm grey/brown for give up */
+            --btn-reset: #eab308;
+            --win-color: #388e3c;
         }
 
         /* Basic Resets for Mobile */
@@ -52,15 +52,15 @@
             border-radius: 8px;
             color: white;
             transition: transform 0.1s, opacity 0.2s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .btn-daily { background-color: var(--btn-daily); border: 2px solid #ab47bc; box-shadow: 0 0 10px rgba(142,36,170,0.5); }
+        .btn-daily { background-color: var(--btn-daily); border: 2px solid #ab47bc; box-shadow: 0 0 10px rgba(142,36,170,0.2); }
         .btn-easy { background-color: var(--btn-easy); }
         .btn-normal { background-color: var(--btn-normal); }
         .btn-hard { background-color: var(--btn-hard); }
         .diff-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(1.02); }
         .diff-btn small { font-weight: normal; font-size: 13px; display: block; margin-top: 5px; opacity: 0.9; }
-        .diff-btn:disabled { background-color: #444; color: #888; cursor: not-allowed; box-shadow: none; border: none; }
+        .diff-btn:disabled { background-color: #dcd3c2; color: #999388; cursor: not-allowed; box-shadow: none; border: none; }
 
         /* Credits */
         .credits { margin-top: 40px; font-size: 14px; color: var(--text-muted); }
@@ -79,7 +79,7 @@
             border-radius: 6px;
             background-color: var(--box-bg);
             color: var(--text-main);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); 
         }
         input:focus { outline: 2px solid var(--btn-normal); }
         
@@ -98,7 +98,7 @@
         .btn-reset { background-color: var(--btn-reset); color: #000; margin: 30px auto; display: none; width: 100%; max-width: 350px;}
         .btn-next-round { background-color: var(--btn-daily); color: white; margin: 20px auto; display: none; width: 100%; max-width: 350px; }
         
-        button:disabled { background-color: #333; color: #666; cursor: not-allowed; box-shadow: none; transform: none; }
+        button:disabled { background-color: #dcd3c2; color: #999388; cursor: not-allowed; box-shadow: none; transform: none; }
         
         /* Grid Output Styling */
         #output { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
@@ -107,18 +107,18 @@
             background-color: var(--box-bg); border: 1px solid var(--border-color);
             border-radius: 8px; padding: 12px 8px; flex: 1; display: flex;
             flex-direction: column; justify-content: center; align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2); text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04); text-align: center;
         }
         .box-label { font-size: 0.70em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
         .box-value { font-size: 1.05em; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; word-break: break-word; }
         .name-box { flex: 2; }
 
         .end-msg { font-size: 20px; font-weight: bold; margin-top: 20px; padding: 15px; border-radius: 8px; }
-        .win { background-color: rgba(76, 175, 80, 0.2); color: var(--win-color); border: 1px solid var(--win-color); }
-        .lose { background-color: rgba(220, 53, 69, 0.2); color: #ff6b6b; border: 1px solid #ff6b6b; }
+        .win { background-color: rgba(76, 175, 80, 0.15); color: var(--win-color); border: 1px solid var(--win-color); }
+        .lose { background-color: rgba(220, 53, 69, 0.1); color: #d32f2f; border: 1px solid #d32f2f; }
 
         /* End Screen Formatting */
-        .huge-score { font-size: 4em; color: var(--win-color); margin: 10px 0; font-weight: bold; text-shadow: 0 0 10px rgba(76, 175, 80, 0.5); }
+        .huge-score { font-size: 4em; color: var(--win-color); margin: 10px 0; font-weight: bold; text-shadow: 0 0 10px rgba(76, 175, 80, 0.2); }
         
         /* Mobile Adjustments */
         @media (max-width: 600px) {
@@ -128,7 +128,7 @@
             .guess-row {
                 display: grid; grid-template-columns: 1fr 1fr; 
                 grid-template-areas: "name name" "len class" "cca gender";
-                gap: 8px; background-color: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px;
+                gap: 8px; background-color: rgba(0,0,0,0.02); padding: 10px; border-radius: 10px;
             }
             .guess-box:nth-child(1) { grid-area: name; padding: 15px;}
             .guess-box:nth-child(2) { grid-area: len; }
@@ -152,7 +152,7 @@
             <small>5 Rounds • SGT 12:00am Reset • Global Daily Target</small>
         </button>
 
-        <button id="viewScoreBtn" class="diff-btn btn-normal" style="background-color: #444; margin-top: 5px; padding: 10px; display: none;" onclick="showScoreScreen()">
+        <button id="viewScoreBtn" class="diff-btn btn-normal" style="background-color: var(--btn-giveup); margin-top: 5px; padding: 10px; display: none;" onclick="showScoreScreen()">
             📊 View Today's Score
         </button>
 
@@ -405,7 +405,7 @@
                         <div class="guess-box"><span class="box-label">Class</span><span class="box-value">${guessObj.Class} ${feedback[1]}</span></div>
                         <div class="guess-box"><span class="box-label">CCA</span><span class="box-value">${guessObj.CCA} ${feedback[2]}</span></div>
                         <div class="guess-box"><span class="box-label">Gender</span><span class="box-value">${guessObj.Gender} ${feedback[0]}</span></div>
-                        <div class="guess-box"></div>
+                        <div class="guess-box" style="display:none;"></div>
                     </div>
                 `;
                 output.insertAdjacentHTML('beforeend', rowHTML);
@@ -458,8 +458,8 @@
                         updateDailyHUD();
                         output.insertAdjacentHTML('beforeend', `<div class="end-msg win">+${roundPoints} Points!</div>`);
                         
-                        // Push attempt digit to array: 'X' if > 9 attempts
-                        let displayAttempt = roundAttempts > 9 ? 'X' : roundAttempts;
+                        // Push attempt digit to array: 'X' if >= 10 attempts
+                        let displayAttempt = roundAttempts >= 10 ? 'X' : roundAttempts;
                         dailyAttemptsHistory.push(displayAttempt);
                     } else {
                         output.insertAdjacentHTML('beforeend', `<div class="end-msg win">W fortnite</div>`);
