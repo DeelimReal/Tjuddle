@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TJdle 2025</title>
+    <style>
+        /* Dark Mode Theme Variables */
+        :root {
+            --bg-color: #121212;
+            --text-main: #e0e0e0;
+            --text-muted: #888888;
+            --box-bg: #1e1e1e;
+            --border-color: #333333;
+            --btn-easy: #2e7d32;
+            --btn-normal: #1976d2;
+            --btn-hard: #c62828;
+            --btn-daily: #8e24aa;
+            --btn-giveup: #555555;
+            --btn-reset: #fbc02d;
+            --win-color: #4caf50;
+        }
+
+        /* Basic Resets for Mobile */
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 15px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            text-align: center;
+        }
+        
+        /* Screens */
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+        /* Menu Buttons */
+        .diff-btn {
+            display: block;
+            width: 100%;
+            max-width: 320px;
+            margin: 12px auto;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            transition: transform 0.1s, opacity 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .btn-daily { background-color: var(--btn-daily); border: 2px solid #ab47bc; box-shadow: 0 0 10px rgba(142,36,170,0.5); }
+        .btn-easy { background-color: var(--btn-easy); }
+        .btn-normal { background-color: var(--btn-normal); }
+        .btn-hard { background-color: var(--btn-hard); }
+        .diff-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(1.02); }
+        .diff-btn small { font-weight: normal; font-size: 13px; display: block; margin-top: 5px; opacity: 0.9; }
+        .diff-btn:disabled { background-color: #444; color: #888; cursor: not-allowed; box-shadow: none; border: none; }
+
+        /* Credits */
+        .credits { margin-top: 40px; font-size: 14px; color: var(--text-muted); }
+        .credits p { margin: 5px 0; }
+
+        /* Game Controls */
+        .game-header { display: flex; justify-content: space-between; align-items: center; max-width: 350px; margin: 0 auto 10px auto; font-weight: bold; color: var(--btn-daily); }
+        .controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+        
+        input[type="text"], input[list] {
+            padding: 12px;
+            width: 100%;
+            max-width: 350px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--box-bg);
+            color: var(--text-main);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        input:focus { outline: 2px solid var(--btn-normal); }
+        
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .btn-action { color: white; flex: 1; min-width: 140px; max-width: 200px; }
+        .btn-submit { background-color: var(--btn-easy); }
+        .btn-giveup { background-color: var(--btn-giveup); }
+        .btn-reset { background-color: var(--btn-reset); color: #000; margin: 30px auto; display: none; width: 100%; max-width: 350px;}
+        .btn-next-round { background-color: var(--btn-daily); color: white; margin: 20px auto; display: none; width: 100%; max-width: 350px; }
+        
+        button:disabled { background-color: #333; color: #666; cursor: not-allowed; box-shadow: none; transform: none; }
+        
+        /* Grid Output Styling */
+        #output { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .guess-row { display: flex; gap: 10px; animation: fadeIn 0.4s ease-in-out; }
+        .guess-box {
+            background-color: var(--box-bg); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 12px 8px; flex: 1; display: flex;
+            flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); text-align: center;
+        }
+        .box-label { font-size: 0.70em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
+        .box-value { font-size: 1.05em; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; word-break: break-word; }
+        .name-box { flex: 2; }
+
+        .end-msg { font-size: 20px; font-weight: bold; margin-top: 20px; padding: 15px; border-radius: 8px; }
+        .win { background-color: rgba(76, 175, 80, 0.2); color: var(--win-color); border: 1px solid var(--win-color); }
+        .lose { background-color: rgba(220, 53, 69, 0.2); color: #ff6b6b; border: 1px solid #ff6b6b; }
+
+        /* End Screen Formatting */
+        .huge-score { font-size: 4em; color: var(--win-color); margin: 10px 0; font-weight: bold; text-shadow: 0 0 10px rgba(76, 175, 80, 0.5); }
+        
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8em; margin-top: 10px;}
+            .controls { flex-direction: column; align-items: center; }
+            .btn-action { width: 100%; max-width: 350px; }
+            .guess-row {
+                display: grid; grid-template-columns: 1fr 1fr; 
+                grid-template-areas: "name name" "len class" "cca gender";
+                gap: 8px; background-color: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px;
+            }
+            .guess-box:nth-child(1) { grid-area: name; padding: 15px;}
+            .guess-box:nth-child(2) { grid-area: len; }
+            .guess-box:nth-child(3) { grid-area: class; }
+            .guess-box:nth-child(4) { grid-area: cca; }
+            .guess-box:nth-child(5) { grid-area: gender; }
+            .hard-grid .guess-box:nth-child(5) { display: none; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="menu-screen" class="screen active">
+        <h1>TJdle 2025</h1>
+        <p style="margin-bottom: 20px; color: var(--text-muted);">Select your game mode:</p>
+        
+        <button id="dailyBtn" class="diff-btn btn-daily" onclick="startGame('daily')">
+            TJ Dailies 🌟
+            <small>5 Rounds • SGT 12:00am Reset • Global Daily Target</small>
+        </button>
+
+        <button id="viewScoreBtn" class="diff-btn btn-normal" style="background-color: #444; margin-top: 5px; padding: 10px; display: none;" onclick="showScoreScreen()">
+            📊 View Today's Score
+        </button>
+
+        <hr style="border-color: var(--border-color); margin: 30px auto; width: 80%; max-width: 300px;">
+
+        <button class="diff-btn btn-easy" onclick="startGame('easy')">
+            Easy (Socially Inept)
+            <small>Hints in dropdown + partial matches</small>
+        </button>
+        <button class="diff-btn btn-normal" onclick="startGame('normal')">
+            Normal
+            <small>Names only + partial matches</small>
+        </button>
+        <button class="diff-btn btn-hard" onclick="startGame('hard')">
+            Hard (C.B.T.)
+            <small>Strict Exact Matches Only</small>
+        </button>
+
+        <div class="credits">
+            <p>made by Dwayne 05/25</p>
+            <p>ig: @deelimreal</p>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <h2 id="game-title">TJdle 2025</h2>
+        
+        <div id="daily-header" class="game-header" style="display: none;">
+            <span id="round-counter">Round 1 / 5</span>
+            <span id="score-counter">Score: 0</span>
+            <span id="attempt-counter">Attempts: 0</span>
+        </div>
+        
+        <div class="controls">
+            <input list="student-names" id="guessInput" placeholder="Choose TJcian" autocomplete="off">
+            <datalist id="student-names"></datalist>
+            
+            <button id="submitBtn" class="btn-action btn-submit">Submit Guess</button>
+            <button id="giveUpBtn" class="btn-action btn-giveup">Give Up</button>
+        </div>
+
+        <div id="output"></div>
+        
+        <button id="nextRoundBtn" class="btn-next-round" onclick="loadNextDailyRound()">Start Next Round</button>
+        <button id="resetBtn" class="btn-reset" onclick="returnToMenu()">Return to Menu</button>
+    </div>
+
+    <div id="score-screen" class="screen">
+        <h2>TJ Dailies Complete!</h2>
+        
+        <p style="color: var(--text-muted); margin-top: 30px;">Your Total Score</p>
+        <div id="final-score" class="huge-score">0</div>
+        
+        <p style="color: var(--text-muted); margin-top: 30px;">Attempt Code</p>
+        <div id="daily-code" class="huge-score" style="font-size: 3em; letter-spacing: 10px; color: var(--btn-normal); text-shadow: none;">00000</div>
+        <p style="font-size: 12px; color: var(--text-muted);">(0 = Gave Up, X = 10+ Attempts)</p>
+        
+        <div style="margin-top: 40px;">
+            <button class="btn-action btn-giveup" style="width: 100%; max-width: 350px;" onclick="returnToMenu()">Back to Menu</button>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    
+    <script>
+        // --- GAME STATE ---
+        let currentMode = "";
+        let targetAns = null;
+        
+        // Daily Mode State
+        let dailyTargets = [];
+        let currentRound = 0;
+        let totalScore = 0;
+        let roundAttempts = 0;
+        let dailyAttemptsHistory = []; // Tracks the 5 digit code
+
+        // DOM Elements
+        const screens = document.querySelectorAll('.screen');
+        const gameTitle = document.getElementById("game-title");
+        const datalist = document.getElementById("student-names");
+        const input = document.getElementById("guessInput");
+        const submitBtn = document.getElementById("submitBtn");
+        const giveUpBtn = document.getElementById("giveUpBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        const nextRoundBtn = document.getElementById("nextRoundBtn");
+        const output = document.getElementById("output");
+        
+        // Daily Elements
+        const dailyHeader = document.getElementById("daily-header");
+        const roundCounter = document.getElementById("round-counter");
+        const scoreCounter = document.getElementById("score-counter");
+        const attemptCounter = document.getElementById("attempt-counter");
+        const dailyBtn = document.getElementById("dailyBtn");
+        const viewScoreBtn = document.getElementById("viewScoreBtn");
+
+        // --- UTILITY FUNCTIONS ---
+
+        function showScreen(screenId) {
+            screens.forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function getNameLength(nameStr) {
+            return nameStr.replace(/ /g, "").length;
+        }
+
+        // Get current Singapore Date string (YYYY-MM-DD)
+        function getSGTDateString() {
+            let d = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Singapore"}));
+            return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+        }
+
+        // Seeded RNG for Daily Mode
+        function seededRandom(seed) {
+            var t = seed += 0x6D2B79F5;
+            t = Math.imul(t ^ t >>> 15, t | 1);
+            t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        }
+
+        function generateDailyTargets() {
+            let dateStr = getSGTDateString();
+            let hash = 0;
+            for (let i = 0; i < dateStr.length; i++) {
+                hash = (hash << 5) - hash + dateStr.charCodeAt(i);
+                hash |= 0;
+            }
+            let targets = [];
+            let seed = hash;
+            let available = [...cohortData]; 
+            
+            for(let i=0; i<5; i++) {
+                seed++;
+                let rnd = seededRandom(seed);
+                let idx = Math.floor(rnd * available.length);
+                targets.push(available.splice(idx, 1)[0]);
+            }
+            return targets.sort(() => Math.random() - 0.5);
+        }
+
+        function setupMenuButtons() {
+            let lastPlayed = localStorage.getItem("tjdle_last_played");
+            if (lastPlayed === getSGTDateString()) {
+                dailyBtn.disabled = true;
+                dailyBtn.innerHTML = "TJ Dailies (Played Today) ✔️<small>Come back tomorrow at 12:00am SGT</small>";
+                viewScoreBtn.style.display = "block"; // Show the score button
+            } else {
+                dailyBtn.disabled = false;
+                dailyBtn.innerHTML = "TJ Dailies 🌟<small>5 Rounds • SGT 12:00am Reset • Global Daily Target</small>";
+                viewScoreBtn.style.display = "none";
+            }
+        }
+
+        window.onload = setupMenuButtons;
+
+        // --- GAME LOGIC ---
+
+        function startGame(mode) {
+            currentMode = mode;
+            output.innerHTML = "";
+            input.value = "";
+            submitBtn.disabled = false;
+            giveUpBtn.disabled = false;
+            input.disabled = false;
+            resetBtn.style.display = "none";
+            nextRoundBtn.style.display = "none";
+
+            if (mode === 'daily') {
+                dailyTargets = generateDailyTargets();
+                currentRound = 0;
+                totalScore = 0;
+                dailyAttemptsHistory = [];
+                gameTitle.innerText = "--- TJ Dailies ---";
+                dailyHeader.style.display = "flex";
+                loadNextDailyRound();
+            } else {
+                dailyHeader.style.display = "none";
+                targetAns = cohortData[Math.floor(Math.random() * cohortData.length)];
+                if (mode === 'hard') gameTitle.innerText = "--- TJdle 2025 CBT ---";
+                else if (mode === 'easy') gameTitle.innerText = "--- TJdle 2025 SOCIALLY INEPT ---";
+                else gameTitle.innerText = "--- TJdle 2025 ---";
+            }
+
+            datalist.innerHTML = "";
+            cohortData.forEach(student => {
+                let option = document.createElement("option");
+                if (mode === 'easy') option.value = `${student.Name} | ${student.Class} | ${student.CCA}`;
+                else option.value = student.Name;
+                datalist.appendChild(option);
+            });
+
+            showScreen('game-screen');
+            input.focus();
+        }
+
+        function loadNextDailyRound() {
+            targetAns = dailyTargets[currentRound];
+            currentRound++;
+            roundAttempts = 0;
+            
+            output.innerHTML = "";
+            input.value = "";
+            input.disabled = false;
+            submitBtn.disabled = false;
+            giveUpBtn.disabled = false;
+            nextRoundBtn.style.display = "none";
+            
+            updateDailyHUD();
+            input.focus();
+        }
+
+        function updateDailyHUD() {
+            roundCounter.innerText = `Round ${currentRound} / 5`;
+            scoreCounter.innerText = `Score: ${totalScore}`;
+            attemptCounter.innerText = `Attempts: ${roundAttempts}`;
+        }
+
+        submitBtn.addEventListener("click", () => {
+            let rawInput = input.value.trim();
+            if (!rawInput) return;
+
+            let guessName = currentMode === 'easy' ? rawInput.split(" | ")[0] : rawInput;
+            let guessObj = cohortData.find(s => s.Name === guessName);
+
+            if (!guessObj) {
+                alert("Student not found. Please choose from the list.");
+                return;
+            }
+
+            if (currentMode === 'daily') {
+                roundAttempts++;
+                updateDailyHUD();
+            }
+
+            let rowHTML = "";
+
+            // --- HARD DIFFICULTY ---
+            if (currentMode === 'hard') {
+                let feedback = [];
+                let props = ['Gender', 'Class', 'CCA', 'Name'];
+                
+                for (let i = 0; i < 4; i++) {
+                    if (guessObj[props[i]] === targetAns[props[i]]) feedback.push("✅");
+                    else feedback.push("❌");
+                }
+
+                rowHTML = `
+                    <div class="guess-row hard-grid">
+                        <div class="guess-box name-box"><span class="box-label">Name</span><span class="box-value">${guessObj.Name} ${feedback[3]}</span></div>
+                        <div class="guess-box"><span class="box-label">Class</span><span class="box-value">${guessObj.Class} ${feedback[1]}</span></div>
+                        <div class="guess-box"><span class="box-label">CCA</span><span class="box-value">${guessObj.CCA} ${feedback[2]}</span></div>
+                        <div class="guess-box"><span class="box-label">Gender</span><span class="box-value">${guessObj.Gender} ${feedback[0]}</span></div>
+                        <div class="guess-box"></div>
+                    </div>
+                `;
+                output.insertAdjacentHTML('beforeend', rowHTML);
+
+                if (guessObj.Name === targetAns.Name) {
+                    output.insertAdjacentHTML('beforeend', `<div class="end-msg win">winner winner chicken dinner</div>`);
+                    endMatch(true);
+                }
+            } 
+            // --- NORMAL, EASY, & DAILY DIFFICULTY ---
+            else {
+                let class_feedback = "❌";
+                try {
+                    let g_num = parseInt(guessObj.Class.split('/')[0]);
+                    let t_num = parseInt(targetAns.Class.split('/')[0]);
+                    if (g_num === t_num) class_feedback = "✅";
+                    else if (g_num < t_num) class_feedback = "↑";
+                    else class_feedback = "↓";
+                } catch(e) {}
+
+                let gcount = getNameLength(guessObj.Name);
+                let tcount = getNameLength(targetAns.Name);
+                let name_feedback = "";
+                if (gcount === tcount) name_feedback = "🟧";
+                else if (gcount < tcount) name_feedback = "↑";
+                else if (gcount > tcount) name_feedback = "↓";
+                if (guessObj.Name === targetAns.Name) name_feedback = "✅";
+
+                let cca_feedback = "❌";
+                if (guessObj.CCA === targetAns.CCA) cca_feedback = "✅";
+                else if (guessObj.Type && targetAns.Type && guessObj.Type === targetAns.Type) cca_feedback = "🟧";
+
+                let gender_feedback = guessObj.Gender === targetAns.Gender ? "✅" : "❌";
+
+                rowHTML = `
+                    <div class="guess-row">
+                        <div class="guess-box name-box"><span class="box-label">Name</span><span class="box-value">${guessObj.Name}</span></div>
+                        <div class="guess-box"><span class="box-label">Len (${gcount})</span><span class="box-value">${name_feedback}</span></div>
+                        <div class="guess-box"><span class="box-label">Class</span><span class="box-value">${guessObj.Class} ${class_feedback}</span></div>
+                        <div class="guess-box"><span class="box-label">CCA</span><span class="box-value">${guessObj.CCA} ${cca_feedback}</span></div>
+                        <div class="guess-box"><span class="box-label">Gender</span><span class="box-value">${guessObj.Gender} ${gender_feedback}</span></div>
+                    </div>
+                `;
+                output.insertAdjacentHTML('beforeend', rowHTML);
+
+                if (guessObj.Name === targetAns.Name) {
+                    if (currentMode === 'daily') {
+                        let roundPoints = Math.floor(1000 / roundAttempts);
+                        totalScore += roundPoints;
+                        updateDailyHUD();
+                        output.insertAdjacentHTML('beforeend', `<div class="end-msg win">+${roundPoints} Points!</div>`);
+                        
+                        // Push attempt digit to array: 'X' if > 9 attempts
+                        let displayAttempt = roundAttempts > 9 ? 'X' : roundAttempts;
+                        dailyAttemptsHistory.push(displayAttempt);
+                    } else {
+                        output.insertAdjacentHTML('beforeend', `<div class="end-msg win">W fortnite</div>`);
+                    }
+                    endMatch(true);
+                }
+            }
+            
+            input.value = ""; 
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        input.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                submitBtn.click();
+            }
+        });
+
+        giveUpBtn.addEventListener("click", () => {
+            let tList = `['${targetAns.Gender}', '${targetAns.Class}', '${targetAns.CCA}', '${targetAns.Name}']`;
+            
+            if (currentMode === 'daily') {
+                dailyAttemptsHistory.push('0'); // 0 signifies gave up
+                output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">0 Points.<br><span style="font-size: 0.8em">Target: ${targetAns.Name}</span></div>`);
+            } else {
+                output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">Target was:<br><span style="font-size: 0.8em">${tList}</span></div>`);
+            }
+            
+            endMatch(false);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        function endMatch(won) {
+            submitBtn.disabled = true;
+            giveUpBtn.disabled = true;
+            input.disabled = true;
+
+            if (currentMode === 'daily') {
+                if (currentRound < 5) {
+                    nextRoundBtn.style.display = "block";
+                } else {
+                    // Daily Mode Complete - Save data
+                    localStorage.setItem("tjdle_last_played", getSGTDateString());
+                    localStorage.setItem("tjdle_daily_score", totalScore);
+                    localStorage.setItem("tjdle_daily_history", dailyAttemptsHistory.join(''));
+                    
+                    setupMenuButtons();
+                    setTimeout(() => {
+                        showScoreScreen();
+                    }, 1500);
+                }
+            } else {
+                resetBtn.style.display = "block";
+            }
+        }
+
+        // Show the End Score Screen (callable from menu too)
+        function showScoreScreen() {
+            let savedScore = localStorage.getItem("tjdle_daily_score") || "0";
+            let savedHistory = localStorage.getItem("tjdle_daily_history") || "00000";
+            
+            document.getElementById("final-score").innerText = savedScore;
+            document.getElementById("daily-code").innerText = savedHistory;
+            
+            showScreen('score-screen');
+            window.scrollTo(0, 0);
+        }
+
+        function returnToMenu() {
+            showScreen('menu-screen');
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
