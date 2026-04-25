@@ -927,21 +927,21 @@ const cohortData = [
         "Gender": "M",
         "Class": "03/25",
         "CCA": "Basketball",
-        "Name": "JENN LIM",
+        "Name": "JENN LIM YEE XIAN",
         "Type": "Sports"
     },
     {
         "Gender": "M",
         "Class": "03/25",
         "CCA": "Basketball",
-        "Name": "KAI XIANG",
+        "Name": "YONG KAI XIANG",
         "Type": "Sports"
     },
     {
         "Gender": "M",
         "Class": "04/25",
         "CCA": "Basketball",
-        "Name": "JAKE DOOA",
+        "Name": "JAKE DOOA SHAW KIAT",
         "Type": "Sports"
     },
     {
@@ -969,7 +969,7 @@ const cohortData = [
         "Gender": "M",
         "Class": "09/25",
         "CCA": "Basketball",
-        "Name": "HAN YUAN",
+        "Name": "YAP HAN YUAN",
         "Type": "Sports"
     },
     {
@@ -990,7 +990,7 @@ const cohortData = [
         "Gender": "M",
         "Class": "10/25",
         "CCA": "Basketball",
-        "Name": "VYOMESH",
+        "Name": "KANNAN VYOMESH KRISHNA",
         "Type": "Sports"
     },
     {
@@ -2593,7 +2593,7 @@ const cohortData = [
         "Gender": "M",
         "Class": "11/25",
         "CCA": "Leo Club",
-        "Name": "ONG YI FUNG",
+        "Name": "ONG YI FUNG MARCUS",
         "Type": "Clubs"
     },
     {
