@@ -18,6 +18,7 @@
             --btn-daily: #8e24aa;
             --btn-giveup: #7d7465;
             --btn-reset: #eab308;
+            --btn-versus: #e65100;
             --win-color: #388e3c;
         }
 
@@ -55,6 +56,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .btn-daily { background-color: var(--btn-daily); border: 2px solid #ab47bc; box-shadow: 0 0 10px rgba(142,36,170,0.2); }
+        .btn-versus { background-color: var(--btn-versus); border: 2px solid #ff9800; box-shadow: 0 0 10px rgba(230,81,0,0.2); }
         .btn-easy { background-color: var(--btn-easy); }
         .btn-normal { background-color: var(--btn-normal); }
         .btn-hard { background-color: var(--btn-hard); }
@@ -181,6 +183,11 @@
             <small>5 Rounds • SGT 12:00am Reset • Global Daily Target</small>
         </button>
 
+        <button class="diff-btn btn-versus" onclick="showScreen('versus-menu-screen')">
+            ⚔️ TJ Versus Mode
+            <small>Multiplayer • First to 3 • Normal Difficulty</small>
+        </button>
+
         <button id="viewScoreBtn" class="diff-btn btn-normal" style="background-color: var(--btn-giveup); margin-top: 5px; padding: 10px; display: none;" onclick="showScoreScreen()">
             View Today's Score
         </button>
@@ -213,6 +220,41 @@
         </div>
     </div>
 
+    <div id="versus-menu-screen" class="screen">
+        <h2 style="color: var(--btn-versus);">⚔️ TJ Versus Mode</h2>
+        <p style="margin-bottom: 30px; color: var(--text-muted);">Play in real-time with up to 4 friends.</p>
+
+        <button class="btn-action btn-submit" style="width:100%; max-width:300px; margin-bottom:20px; background-color: var(--btn-versus);" onclick="createVersusRoom()">Create Private Room</button>
+        
+        <div style="background-color: var(--box-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); max-width: 300px; margin: 0 auto;">
+            <p style="margin-top: 0; font-weight: bold;">Join a Room</p>
+            <input type="text" id="joinRoomCode" placeholder="Enter 4-Letter Code" style="text-align:center; text-transform:uppercase; margin-bottom:10px;">
+            <button class="btn-action btn-normal" style="width:100%;" onclick="joinVersusRoom(document.getElementById('joinRoomCode').value)">Join Room</button>
+        </div>
+        
+        <button class="btn-action btn-giveup" style="width:100%; max-width:300px; margin-top:20px;" onclick="showScreen('menu-screen')">Back</button>
+    </div>
+
+    <div id="lobby-screen" class="screen">
+        <h2>Waiting Room</h2>
+        <p style="font-size: 1.2em;">Room Code: <span id="lobby-code" style="color: var(--btn-versus); font-weight: bold; letter-spacing: 2px;"></span></p>
+        
+        <div style="background-color: var(--box-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); max-width: 300px; margin: 20px auto; text-align: left;">
+            <p style="margin-top: 0; font-weight: bold; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Players (Max 4)</p>
+            <div id="lobby-players" style="font-size:1.1em; font-weight:bold; color: var(--btn-normal);"></div>
+        </div>
+
+        <button id="startVersusBtn" class="btn-action btn-submit" style="display:none; width:100%; max-width:300px; background-color: var(--win-color);" onclick="startVersusRound()">Start Game</button>
+        <button class="btn-action btn-giveup" style="width:100%; max-width:300px; margin-top:20px;" onclick="leaveVersusRoom()">Leave Room</button>
+    </div>
+
+    <div id="versus-end-screen" class="screen">
+        <h2>Match Complete!</h2>
+        <p style="color: var(--text-muted); margin-top: 30px;">First to 3 Points Winner</p>
+        <div id="versus-winner-name" class="huge-score" style="font-size:3em; color: var(--btn-versus);"></div>
+        <button class="btn-action btn-giveup" style="width: 100%; max-width: 350px; margin-top: 40px;" onclick="leaveVersusRoom()">Back to Menu</button>
+    </div>
+
     <div id="game-screen" class="screen">
         <h2 id="game-title">TJdle 2025</h2>
         
@@ -220,6 +262,11 @@
             <span id="round-counter">Round 1 / 5</span>
             <span id="score-counter">Score: 0</span>
             <span id="attempt-counter">Attempts: 0</span>
+        </div>
+
+        <div id="versus-header" style="display: none; flex-direction: column; gap: 5px; margin-bottom: 20px; text-align: left; background: var(--box-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); max-width: 350px; margin-left: auto; margin-right: auto;">
+            <strong style="color: var(--btn-versus); text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">⚔️ Live Match ⚔️</strong>
+            <div id="versus-players-list" style="font-size: 0.95em; display: flex; flex-direction: column; gap: 4px;"></div>
         </div>
         
         <div class="controls">
@@ -233,6 +280,7 @@
         <div id="output"></div>
         
         <button id="nextRoundBtn" class="btn-next-round" onclick="loadNextDailyRound()">Start Next Round</button>
+        <button id="nextVersusRoundBtn" class="btn-next-round" style="background-color: var(--btn-versus);" onclick="startVersusRound()">Start Next Round</button>
         <button id="resetBtn" class="btn-reset" onclick="returnToMenu()">Return to Menu</button>
     </div>
 
@@ -280,6 +328,7 @@
         const giveUpBtn = document.getElementById("giveUpBtn");
         const resetBtn = document.getElementById("resetBtn");
         const nextRoundBtn = document.getElementById("nextRoundBtn");
+        const nextVersusRoundBtn = document.getElementById("nextVersusRoundBtn");
         const output = document.getElementById("output");
         
         // Daily Elements
@@ -296,6 +345,9 @@
             screens.forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
         }
+        
+        // Expose to window so HTML buttons can trigger it
+        window.showScreen = showScreen;
 
         window.toggleAuthMode = function(mode) {
             document.getElementById("auth-message").innerText = "";
@@ -370,6 +422,8 @@
             input.disabled = false;
             resetBtn.style.display = "none";
             nextRoundBtn.style.display = "none";
+            nextVersusRoundBtn.style.display = "none";
+            document.getElementById('versus-header').style.display = "none";
 
             if (mode === 'daily') {
                 dailyTargets = generateDailyTargets();
@@ -436,6 +490,9 @@
             if (currentMode === 'daily') {
                 roundAttempts++;
                 updateDailyHUD();
+            } else if (currentMode === 'versus') {
+                roundAttempts++;
+                if (window.updateVersusAttempts) window.updateVersusAttempts(roundAttempts);
             }
 
             let rowHTML = "";
@@ -506,13 +563,17 @@
                         totalScore += roundPoints;
                         updateDailyHUD();
                         output.insertAdjacentHTML('beforeend', `<div class="end-msg win">+${roundPoints} Points!</div>`);
-                        
                         let displayAttempt = roundAttempts >= 10 ? 'X' : roundAttempts;
                         dailyAttemptsHistory.push(displayAttempt);
+                        endMatch(true);
+                    } else if (currentMode === 'versus') {
+                        if (window.submitVersusFinished) window.submitVersusFinished();
+                        output.insertAdjacentHTML('beforeend', `<div class="end-msg win" style="background-color:rgba(230,81,0,0.1); color:var(--btn-versus); border-color:var(--btn-versus);">Correct! Waiting for other players...</div>`);
+                        endMatch(true);
                     } else {
                         output.insertAdjacentHTML('beforeend', `<div class="end-msg win">W fortnite</div>`);
+                        endMatch(true);
                     }
-                    endMatch(true);
                 }
             }
             
@@ -533,6 +594,9 @@
             if (currentMode === 'daily') {
                 dailyAttemptsHistory.push('0'); 
                 output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">0 Points.<br><span style="font-size: 0.8em">Target: ${targetAns.Name}</span></div>`);
+            } else if (currentMode === 'versus') {
+                if (window.submitVersusGiveUp) window.submitVersusGiveUp();
+                output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">Waiting for other players...<br><span style="font-size: 0.8em">Target: ${targetAns.Name}</span></div>`);
             } else {
                 output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">Target was:<br><span style="font-size: 0.8em">${tList}</span></div>`);
             }
@@ -554,16 +618,13 @@
                     localStorage.setItem("tjdle_daily_score", totalScore);
                     localStorage.setItem("tjdle_daily_history", dailyAttemptsHistory.join(''));
                     
-                    // SAVE SCORE TO FIREBASE LEADERBOARD
-                    if (window.saveDailyScore) {
-                        window.saveDailyScore(totalScore, dailyAttemptsHistory.join(''));
-                    }
+                    if (window.saveDailyScore) window.saveDailyScore(totalScore, dailyAttemptsHistory.join(''));
 
                     setupMenuButtons();
-                    setTimeout(() => {
-                        showScoreScreen();
-                    }, 1500);
+                    setTimeout(() => { showScoreScreen(); }, 1500);
                 }
+            } else if (currentMode === 'versus') {
+                // UI waits for Firestore 'roundEnd' event
             } else {
                 resetBtn.style.display = "block";
             }
@@ -583,10 +644,7 @@
             showScreen('score-screen');
             window.scrollTo(0, 0);
 
-            // Fetch and load the global leaderboard
-            if (window.loadLeaderboard) {
-                window.loadLeaderboard();
-            }
+            if (window.loadLeaderboard) window.loadLeaderboard();
         }
 
         function returnToMenu() {
@@ -598,8 +656,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        // Added Firestore queries for username lookup and leaderboards
-        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        // Added updateDoc, onSnapshot, deleteField for Multiplayer
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, getDocs, deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCYDAf13iiTzXq0Z6vEfvn_XJjVpQHLqOM",
@@ -615,11 +673,9 @@
         const db = getFirestore(app);
 
         const authMessage = document.getElementById("auth-message");
-        
-        // Global variable to store who is playing so we can save their score
         window.loggedInUsername = "";
 
-        // Helper function to display messages
+        // --- AUTHENTICATION & LOGIN ---
         function showAuthMessage(msg, type) {
             authMessage.innerText = msg;
             if (type === "error") authMessage.style.color = "#d32f2f";
@@ -632,15 +688,12 @@
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         }
 
-        // Database Verification Function
         async function checkApproval(user) {
             try {
-                const userEmail = user.email.toLowerCase();
-                const docSnap = await getDoc(doc(db, "users", userEmail));
-
+                const docSnap = await getDoc(doc(db, "users", user.email.toLowerCase()));
                 if (docSnap.exists() && docSnap.data().approved === true) {
                     showAuthMessage("", "");
-                    window.loggedInUsername = docSnap.data().username; // Save username for leaderboard
+                    window.loggedInUsername = docSnap.data().username; 
                     document.getElementById('login-screen').classList.remove('active');
                     document.getElementById('menu-screen').classList.add('active');
                 } else {
@@ -648,187 +701,324 @@
                     signOut(auth);
                 }
             } catch (error) {
-                console.error("Database error:", error);
-                showAuthMessage("Error connecting to the database. Please try again.", "error");
+                showAuthMessage("Error connecting to database.", "error");
                 signOut(auth);
             }
         }
 
-        // --- HANDLE USERNAME LOGIN ---
         document.getElementById("loginBtn").addEventListener("click", async () => {
             const usernameInput = document.getElementById("loginUsername").value.trim();
             const pass = document.getElementById("loginPassword").value;
-
-            if (!usernameInput || !pass) {
-                return showAuthMessage("Please enter both username and password.", "error");
-            }
-
+            if (!usernameInput || !pass) return showAuthMessage("Please enter both.", "error");
             showAuthMessage("Signing in...", "info");
 
             try {
-                // Because Firebase uses email/pass, we must look up the user's email based on the username they entered.
                 const usersRef = collection(db, "users");
                 const q = query(usersRef, where("username", "==", usernameInput));
                 const querySnapshot = await getDocs(q);
 
-                if (querySnapshot.empty) {
-                    return showAuthMessage("Username not found.", "error");
-                }
-
+                if (querySnapshot.empty) return showAuthMessage("Username not found.", "error");
                 let userEmail = "";
-                querySnapshot.forEach((doc) => {
-                    userEmail = doc.data().email;
-                });
+                querySnapshot.forEach((doc) => { userEmail = doc.data().email; });
 
-                // Now actually log them in
                 const userCredential = await signInWithEmailAndPassword(auth, userEmail, pass);
                 await checkApproval(userCredential.user);
             } catch (error) {
-                console.error(error);
                 showAuthMessage("Invalid username or password.", "error");
             }
         });
 
-        // --- HANDLE SIGN UP ---
         document.getElementById("signupBtn").addEventListener("click", async () => {
             const username = document.getElementById("signupUsername").value.trim();
             const realName = document.getElementById("signupRealName").value.trim();
             const email = document.getElementById("signupEmail").value.trim();
             const pass = document.getElementById("signupPassword").value;
 
-            if (!username || !realName || !email || !pass) {
-                return showAuthMessage("Please fill in all fields.", "error");
-            }
-            if (pass.length < 6) {
-                return showAuthMessage("Password must be at least 6 characters.", "error");
-            }
+            if (!username || !realName || !email || !pass) return showAuthMessage("Fill all fields.", "error");
+            if (pass.length < 6) return showAuthMessage("Password min 6 characters.", "error");
 
             showAuthMessage("Checking username...", "info");
 
             try {
-                // 1. Ensure username is not already taken
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("username", "==", username));
+                const q = query(collection(db, "users"), where("username", "==", username));
                 const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    return showAuthMessage("That username is already taken.", "error");
-                }
+                if (!querySnapshot.empty) return showAuthMessage("Username taken.", "error");
 
                 showAuthMessage("Creating account...", "info");
-
-                // 2. Create the user in Firebase Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 
-                // 3. Save details into Firestore Database
                 await setDoc(doc(db, "users", email.toLowerCase()), {
-                    email: email.toLowerCase(),
-                    username: username,
-                    realName: realName,
-                    approved: false, // Must wait for admin
-                    signupDate: new Date().toISOString()
+                    email: email.toLowerCase(), username: username, realName: realName,
+                    approved: false, signupDate: new Date().toISOString()
                 });
 
-                // 4. Show success message explicitly requested and sign them out
                 showAuthMessage("DM @deelimreal on instagram or message 83828100 on whatsapp to get your account approved", "success");
                 signOut(auth);
-
-                // Clear fields
-                document.getElementById("signupUsername").value = "";
-                document.getElementById("signupRealName").value = "";
-                document.getElementById("signupEmail").value = "";
-                document.getElementById("signupPassword").value = "";
-
             } catch (error) {
-                console.error(error);
-                if (error.code === 'auth/email-already-in-use') {
-                    showAuthMessage("That email is already registered. Please log in.", "error");
-                } else if (error.code === 'auth/invalid-email') {
-                    showAuthMessage("Please enter a valid email address.", "error");
-                } else {
-                    showAuthMessage(error.message, "error");
-                }
+                if (error.code === 'auth/email-already-in-use') showAuthMessage("Email already registered.", "error");
+                else showAuthMessage(error.message, "error");
             }
         });
 
-        // Check if already logged in (e.g. they refreshed the page)
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                checkApproval(user);
-            }
-        });
+        onAuthStateChanged(auth, (user) => { if (user) checkApproval(user); });
 
         // --- LEADERBOARD LOGIC ---
-        
-        // Save score to Firebase
         window.saveDailyScore = async function(score, history) {
             if (!window.loggedInUsername) return;
             try {
                 const dateStr = getSGTDateString();
-                const scoreRef = doc(db, "leaderboard", dateStr + "_" + window.loggedInUsername);
-                await setDoc(scoreRef, {
-                    username: window.loggedInUsername,
-                    score: score,
-                    history: history,
-                    date: dateStr,
-                    timestamp: new Date().toISOString()
+                await setDoc(doc(db, "leaderboard", dateStr + "_" + window.loggedInUsername), {
+                    username: window.loggedInUsername, score: score, history: history,
+                    date: dateStr, timestamp: new Date().toISOString()
                 });
-            } catch (e) {
-                console.error("Could not save score to leaderboard:", e);
-            }
+            } catch (e) { console.error(e); }
         };
 
-        // Load leaderboard from Firebase
         window.loadLeaderboard = async function() {
             const listDiv = document.getElementById("leaderboard-list");
             listDiv.innerHTML = "Loading...";
-            
             try {
-                const lbRef = collection(db, "leaderboard");
-                const q = query(lbRef, where("date", "==", getSGTDateString()));
+                const q = query(collection(db, "leaderboard"), where("date", "==", getSGTDateString()));
                 const querySnapshot = await getDocs(q);
+                if (querySnapshot.empty) return listDiv.innerHTML = "<div style='text-align:center; color: var(--text-muted);'>No scores yet today. Be the first!</div>";
                 
-                if (querySnapshot.empty) {
-                    listDiv.innerHTML = "<div style='text-align:center; color: var(--text-muted);'>No scores yet today. Be the first!</div>";
-                    return;
-                }
-
-                // Gather scores into an array
                 let scores = [];
-                querySnapshot.forEach((doc) => {
-                    scores.push(doc.data());
-                });
-
-                // Sort scores highest to lowest
+                querySnapshot.forEach((doc) => scores.push(doc.data()));
                 scores.sort((a, b) => b.score - a.score);
 
-                // Build HTML
                 let html = "<div style='display: flex; flex-direction: column; gap: 8px;'>";
                 let rank = 1;
-                
-                // Show top 10
                 scores.slice(0, 10).forEach((data) => {
-                    let medal = "";
-                    if (rank === 1) medal = "🥇";
-                    else if (rank === 2) medal = "🥈";
-                    else if (rank === 3) medal = "🥉";
-                    else medal = `<span style="display:inline-block; width:1.5em; text-align:center;">#${rank}</span>`;
-
-                    html += `
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">
+                    let medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `<span style="display:inline-block; width:1.5em; text-align:center;">#${rank}</span>`;
+                    html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">
                         <span>${medal} <strong>${data.username}</strong></span>
                         <span style="color: var(--win-color); font-weight: bold;">${data.score}</span>
                     </div>`;
                     rank++;
                 });
-                
-                html += "</div>";
-                listDiv.innerHTML = html;
-
-            } catch (error) {
-                console.error("Error loading leaderboard:", error);
-                listDiv.innerHTML = "<div style='text-align:center; color: #d32f2f;'>Could not load leaderboard.</div>";
-            }
+                listDiv.innerHTML = html + "</div>";
+            } catch (error) { listDiv.innerHTML = "<div style='text-align:center; color: #d32f2f;'>Could not load leaderboard.</div>"; }
         };
+
+        // --- ⚔️ VERSUS MULTIPLAYER LOGIC ⚔️ ---
+        let unsubscribeVersus = null;
+        let versusRoomCode = null;
+
+        window.createVersusRoom = async function() {
+            const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const roomRef = doc(db, "rooms", code);
+            
+            await setDoc(roomRef, {
+                host: window.loggedInUsername,
+                state: 'lobby', // lobby, playing, roundEnd, gameOver
+                round: 1,
+                target: null,
+                winners: [],
+                players: { [window.loggedInUsername]: { score: 0, attempts: 0, finished: false } }
+            });
+            versusRoomCode = code;
+            listenToRoom();
+        };
+
+        window.joinVersusRoom = async function(code) {
+            code = code.toUpperCase();
+            if(!code) return;
+            const roomRef = doc(db, "rooms", code);
+            const docSnap = await getDoc(roomRef);
+            
+            if (!docSnap.exists()) return alert("Room not found!");
+            if (docSnap.data().state !== 'lobby') return alert("Game already started!");
+            if (Object.keys(docSnap.data().players).length >= 4) return alert("Room is full! (Max 4)");
+            
+            await updateDoc(roomRef, {
+                [`players.${window.loggedInUsername}`]: { score: 0, attempts: 0, finished: false }
+            });
+            versusRoomCode = code;
+            listenToRoom();
+        };
+
+        window.startVersusRound = async function() {
+            const roomRef = doc(db, "rooms", versusRoomCode);
+            const docSnap = await getDoc(roomRef);
+            let data = docSnap.data();
+            
+            // Reset player attempts
+            let newPlayers = {...data.players};
+            for(let p in newPlayers) {
+                newPlayers[p].attempts = 0;
+                newPlayers[p].finished = false;
+            }
+            
+            // Host generates a random target for everyone
+            let randomTarget = cohortData[Math.floor(Math.random() * cohortData.length)];
+            
+            await updateDoc(roomRef, {
+                state: 'playing',
+                round: data.state === 'lobby' ? 1 : data.round + 1,
+                target: randomTarget,
+                players: newPlayers,
+                winners: []
+            });
+        };
+
+        window.updateVersusAttempts = async function(tries) {
+            await updateDoc(doc(db, "rooms", versusRoomCode), {
+                [`players.${window.loggedInUsername}.attempts`]: tries
+            });
+        };
+
+        window.submitVersusFinished = async function() {
+            await updateDoc(doc(db, "rooms", versusRoomCode), {
+                [`players.${window.loggedInUsername}.finished`]: true
+            });
+        };
+
+        window.submitVersusGiveUp = async function() {
+            await updateDoc(doc(db, "rooms", versusRoomCode), {
+                [`players.${window.loggedInUsername}.attempts`]: 99,
+                [`players.${window.loggedInUsername}.finished`]: true
+            });
+        };
+
+        window.leaveVersusRoom = function() {
+            if (unsubscribeVersus) unsubscribeVersus();
+            currentMode = "";
+            window.showScreen('menu-screen');
+            // Hard refresh to fully clear state if needed
+            window.location.reload(); 
+        };
+
+        // THE MAIN SYNC LISTENER
+        function listenToRoom() {
+            const roomRef = doc(db, "rooms", versusRoomCode);
+            
+            unsubscribeVersus = onSnapshot(roomRef, (docSnap) => {
+                if (!docSnap.exists()) {
+                    alert("Room was closed.");
+                    window.leaveVersusRoom();
+                    return;
+                }
+                const data = docSnap.data();
+                const isHost = (window.loggedInUsername === data.host);
+                
+                // STATE 1: LOBBY
+                if (data.state === 'lobby') {
+                    window.showScreen('lobby-screen');
+                    document.getElementById('lobby-code').innerText = versusRoomCode;
+                    
+                    let pList = "";
+                    for(let p in data.players) {
+                        pList += `<div style="padding: 5px 0;">👤 ${p} ${p === data.host ? "👑" : ""}</div>`;
+                    }
+                    document.getElementById('lobby-players').innerHTML = pList;
+                    document.getElementById('startVersusBtn').style.display = isHost ? "block" : "none";
+                }
+                
+                // STATE 2: PLAYING
+                if (data.state === 'playing') {
+                    // Initialize the board if the round just started on our screen
+                    if (currentMode !== 'versus') {
+                        currentMode = 'versus';
+                        targetAns = data.target; 
+                        roundAttempts = 0;
+                        document.getElementById('output').innerHTML = "";
+                        document.getElementById('guessInput').value = "";
+                        document.getElementById('guessInput').disabled = false;
+                        document.getElementById('submitBtn').disabled = false;
+                        document.getElementById('giveUpBtn').disabled = false;
+                        
+                        document.getElementById('nextRoundBtn').style.display = "none";
+                        document.getElementById('nextVersusRoundBtn').style.display = "none";
+                        document.getElementById('resetBtn').style.display = "none";
+                        document.getElementById('daily-header').style.display = "none";
+                        document.getElementById('versus-header').style.display = "flex";
+                        
+                        document.getElementById('game-title').innerText = `--- Versus Round ${data.round} ---`;
+                        
+                        // Load normal mode options
+                        const dl = document.getElementById("student-names");
+                        dl.innerHTML = "";
+                        cohortData.forEach(s => {
+                            let option = document.createElement("option");
+                            option.value = s.Name;
+                            dl.appendChild(option);
+                        });
+                        
+                        window.showScreen('game-screen');
+                    }
+                    
+                    // Live Update the HUD Scoreboard
+                    let hudHtml = "";
+                    for(let p in data.players) {
+                        let status = data.players[p].finished ? "✅ Done" : `📝 ${data.players[p].attempts} tries`;
+                        hudHtml += `<div style="display:flex; justify-content:space-between;">
+                            <span>${p} [${data.players[p].score} pts]</span>
+                            <span>${status}</span>
+                        </div>`;
+                    }
+                    document.getElementById('versus-players-list').innerHTML = hudHtml;
+                    
+                    // Host calculates if everyone is finished
+                    if (isHost) {
+                        let allDone = true;
+                        let minTries = 999;
+                        for(let p in data.players) {
+                            if (!data.players[p].finished) allDone = false;
+                            if (data.players[p].attempts < minTries) minTries = data.players[p].attempts;
+                        }
+                        
+                        if (allDone) {
+                            // Find winners of this round
+                            let roundWinners = [];
+                            let updatedPlayers = {...data.players};
+                            for(let p in updatedPlayers) {
+                                if (updatedPlayers[p].attempts === minTries) {
+                                    updatedPlayers[p].score += 1; // Award point to lowest ties
+                                    roundWinners.push(p);
+                                }
+                            }
+                            
+                            // Check if anyone hit 3 points
+                            let gameWinners = [];
+                            for(let p in updatedPlayers) {
+                                if (updatedPlayers[p].score >= 3) gameWinners.push(p);
+                            }
+                            
+                            if (gameWinners.length > 0) {
+                                updateDoc(roomRef, { state: 'gameOver', players: updatedPlayers, winners: gameWinners });
+                            } else {
+                                updateDoc(roomRef, { state: 'roundEnd', players: updatedPlayers, winners: roundWinners });
+                            }
+                        }
+                    }
+                }
+                
+                // STATE 3: ROUND OVER
+                if (data.state === 'roundEnd') {
+                    if (currentMode === 'versus') {
+                        currentMode = 'versus-waiting'; // prevent multi-trigger
+                        let winNames = data.winners.join(" & ");
+                        document.getElementById('output').insertAdjacentHTML('beforeend', `<div class="end-msg win" style="background-color: var(--win-color); color: white;">Point goes to: ${winNames}!</div>`);
+                        
+                        // Disable inputs
+                        document.getElementById('guessInput').disabled = true;
+                        document.getElementById('submitBtn').disabled = true;
+                        document.getElementById('giveUpBtn').disabled = true;
+                        
+                        if (isHost) {
+                            document.getElementById('nextVersusRoundBtn').style.display = "block";
+                        }
+                    }
+                }
+                
+                // STATE 4: GAME OVER
+                if (data.state === 'gameOver') {
+                    window.showScreen('versus-end-screen');
+                    document.getElementById('versus-winner-name').innerText = data.winners.join(" & ");
+                    if (unsubscribeVersus) unsubscribeVersus(); // Stop listening
+                }
+            });
+        }
     </script>
 </body>
 </html>
