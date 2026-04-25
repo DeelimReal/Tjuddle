@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TJdle 2025</title>
+    <title>TJuddle</title>
     <style>
         
         :root {
@@ -143,7 +143,24 @@
 </head>
 <body>
 
-    <div id="menu-screen" class="screen active">
+    <div id="splash-screen" class="screen active">
+        <h1 style="font-size: 2.5em; margin-bottom: 10px;">Welcome to TJuddle</h1>
+        <p style="margin-bottom: 30px; color: var(--text-muted); font-size: 1.1em;">Before you play, please help us out by filling out this quick form!</p>
+        
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLScAw9_TdCoBHFj2vjDLNlBIDXmOciX0VGqaFa2HRm4e8Grr8w/viewform?fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPNTY3MDY3MzQzMzUyNDI3AAGn6Z900p0QYtvqdR0Q_LrGBC-yZqn4nVl7uP0bmlXTJbqMNICk1Nfi651FriI_aem_fmbqma20imQV6pEZtO8-eA" target="_blank" class="diff-btn btn-daily" style="text-decoration: none; padding: 20px; display: flex; flex-direction: column; align-items: center;">
+            <span style="font-size: 1.2em; margin-bottom: 5px;">📝 Open Google Form</span>
+            <small style="color: rgba(255,255,255,0.8);">(Opens in a new tab)</small>
+        </a>
+
+        <hr style="border-color: var(--border-color); margin: 40px auto; width: 80%; max-width: 300px;">
+
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; max-width: 450px; margin: 0 auto;">
+            <button class="btn-action btn-submit" style="padding: 15px; font-size: 1.1em;" onclick="goToMenu()">▶️ Play TJuddle</button>
+            <button id="shareFormBtn" class="btn-action btn-giveup" style="padding: 15px; font-size: 1.1em;" onclick="copyFormLink()">🔗 Share Forms</button>
+        </div>
+    </div>
+
+    <div id="menu-screen" class="screen">
         <h1>TJuddle</h1>
         <p>made by Dwayne 05/25 </p>
         <p>ig: @deelimreal </p>
@@ -263,6 +280,33 @@
         function showScreen(screenId) {
             screens.forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
+        }
+
+        // Functions for the Splash Screen
+        function goToMenu() {
+            showScreen('menu-screen');
+            window.scrollTo(0, 0);
+        }
+
+        function copyFormLink() {
+            const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScAw9_TdCoBHFj2vjDLNlBIDXmOciX0VGqaFa2HRm4e8Grr8w/viewform?fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPNTY3MDY3MzQzMzUyNDI3AAGn6Z900p0QYtvqdR0Q_LrGBC-yZqn4nVl7uP0bmlXTJbqMNICk1Nfi651FriI_aem_fmbqma20imQV6pEZtO8-eA";
+            
+            navigator.clipboard.writeText(formUrl).then(() => {
+                const btn = document.getElementById("shareFormBtn");
+                const originalText = btn.innerText;
+                
+                // Visual feedback
+                btn.innerText = "Copied! ✅";
+                btn.style.backgroundColor = "var(--win-color)";
+                
+                // Revert after 2 seconds
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.backgroundColor = "var(--btn-giveup)";
+                }, 2000);
+            }).catch(err => {
+                alert("Failed to copy the link. You can manually copy it here: " + formUrl);
+            });
         }
 
         function getNameLength(nameStr) {
@@ -532,7 +576,7 @@
             let savedScore = localStorage.getItem("tjdle_daily_score") || "0";
             let savedHistory = localStorage.getItem("tjdle_daily_history") || "00000";
             
-            // NEW LINES ADDED HERE TO FORMAT THE DATE
+            // Format Date
             let options = { timeZone: "Asia/Singapore", year: 'numeric', month: 'long', day: 'numeric' };
             let readableDate = new Intl.DateTimeFormat('en-US', options).format(new Date());
             document.getElementById("daily-date-display").innerText = readableDate;
