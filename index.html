@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TJuddle</title>
+    <title>TJdle 2025</title>
     <style>
         
         :root {
@@ -70,7 +70,7 @@
         .game-header { display: flex; justify-content: space-between; align-items: center; max-width: 350px; margin: 0 auto 10px auto; font-weight: bold; color: var(--btn-daily); }
         .controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
         
-        input[type="text"], input[list] {
+        input[type="text"], input[type="email"], input[type="password"], input[list] {
             padding: 12px;
             width: 100%;
             max-width: 350px;
@@ -145,15 +145,29 @@
 
     <div id="login-screen" class="screen active">
         <h1 style="font-size: 2.5em; margin-bottom: 10px;">TJuddle</h1>
-        <p style="margin-bottom: 15px; color: var(--text-muted); font-size: 1.1em;">Please sign in to play.</p>
-        <p style="margin-bottom: 40px; color: var(--btn-hard); font-weight: bold; font-size: 1.1em; background-color: rgba(198, 40, 40, 0.1); padding: 10px; border-radius: 8px; display: inline-block;">⚠️ You MUST use an @students.edu.sg account.</p>
+        <p style="margin-bottom: 25px; color: var(--text-muted); font-size: 1.1em;">Please sign in or create an account to play.</p>
         
-        <div style="display: flex; flex-direction: column; align-items: center; max-width: 450px; margin: 0 auto;">
-            <button id="googleLoginBtn" class="btn-action btn-submit" style="padding: 15px; font-size: 1.1em; background-color: #4285F4; width: 100%; max-width: 320px;">
-                🌐 Sign in with Google
-            </button>
-            <p id="login-error" style="color: #d32f2f; margin-top: 20px; font-weight: bold;"></p>
+        <div id="login-form" style="max-width: 350px; margin: 0 auto;">
+            <input type="email" id="loginEmail" placeholder="Email Address" style="margin-bottom: 10px; text-align: center;">
+            <input type="password" id="loginPassword" placeholder="Password" style="margin-bottom: 15px; text-align: center;">
+            <button id="loginBtn" class="btn-action btn-submit" style="width: 100%; max-width: 350px; margin-bottom: 15px;">Login</button>
+            <p style="font-size: 0.9em; color: var(--text-muted);">
+                Don't have an account? <a href="#" onclick="toggleAuthMode('signup')" style="color: var(--btn-normal); font-weight: bold;">Sign Up</a>
+            </p>
         </div>
+
+        <div id="signup-form" style="max-width: 350px; margin: 0 auto; display: none;">
+            <input type="text" id="signupUsername" placeholder="Username" style="margin-bottom: 10px; text-align: center;">
+            <input type="text" id="signupRealName" placeholder="Real Full Name" style="margin-bottom: 10px; text-align: center;">
+            <input type="email" id="signupEmail" placeholder="Email Address" style="margin-bottom: 10px; text-align: center;">
+            <input type="password" id="signupPassword" placeholder="Password (Min 6 characters)" style="margin-bottom: 15px; text-align: center;">
+            <button id="signupBtn" class="btn-action btn-submit" style="width: 100%; max-width: 350px; background-color: var(--btn-daily); margin-bottom: 15px;">Create Account</button>
+            <p style="font-size: 0.9em; color: var(--text-muted);">
+                Already have an account? <a href="#" onclick="toggleAuthMode('login')" style="color: var(--btn-normal); font-weight: bold;">Log In</a>
+            </p>
+        </div>
+
+        <p id="auth-message" style="margin-top: 20px; font-weight: bold;"></p>
     </div>
 
     <div id="menu-screen" class="screen">
@@ -276,6 +290,18 @@
         function showScreen(screenId) {
             screens.forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
+        }
+
+        // Toggles between Login and Signup forms
+        window.toggleAuthMode = function(mode) {
+            document.getElementById("auth-message").innerText = "";
+            if (mode === 'signup') {
+                document.getElementById("login-form").style.display = "none";
+                document.getElementById("signup-form").style.display = "block";
+            } else {
+                document.getElementById("signup-form").style.display = "none";
+                document.getElementById("login-form").style.display = "block";
+            }
         }
 
         function getNameLength(nameStr) {
@@ -557,7 +583,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        // Import Email/Password tools instead of Google Auth
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCYDAf13iiTzXq0Z6vEfvn_XJjVpQHLqOM",
@@ -570,44 +598,115 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+        const db = getFirestore(app);
 
-        const loginBtn = document.getElementById("googleLoginBtn");
-        const errorText = document.getElementById("login-error");
+        const authMessage = document.getElementById("auth-message");
 
-        // Handle the Login Click
-        loginBtn.addEventListener("click", () => {
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    const user = result.user;
-                    
-                    // --- SECURITY CHECK: ENFORCE EMAIL DOMAIN ---
-                    if (!user.email.endsWith("@students.edu.sg")) {
-                        errorText.innerText = "Access Denied: You must use an @students.edu.sg account.";
-                        signOut(auth); 
-                        return;
-                    }
+        // Helper function to display messages
+        function showAuthMessage(msg, type) {
+            authMessage.innerText = msg;
+            if (type === "error") authMessage.style.color = "#d32f2f";
+            else if (type === "success") authMessage.style.color = "var(--btn-easy)";
+            else authMessage.style.color = "var(--text-muted)";
+        }
 
-                    // Success!
-                    errorText.innerText = "";
-                    document.getElementById('login-screen').classList.remove('active');
-                    document.getElementById('menu-screen').classList.add('active');
-                })
-                .catch((error) => {
-                    console.error(error);
-                    errorText.innerText = "Sign-in failed. Please try again or check pop-up blocker.";
-                });
-        });
+        // Database Verification Function (Checks if admin set approved: true)
+        async function checkApproval(user) {
+            try {
+                const userEmail = user.email.toLowerCase();
+                const docSnap = await getDoc(doc(db, "users", userEmail));
 
-        // Check if already logged in
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                if (user.email.endsWith("@students.edu.sg")) {
+                if (docSnap.exists() && docSnap.data().approved === true) {
+                    showAuthMessage("", "");
                     document.getElementById('login-screen').classList.remove('active');
                     document.getElementById('menu-screen').classList.add('active');
                 } else {
+                    showAuthMessage("Access Denied: Your account is pending admin approval.", "error");
                     signOut(auth);
                 }
+            } catch (error) {
+                console.error("Database error:", error);
+                showAuthMessage("Error connecting to the database. Please try again.", "error");
+                signOut(auth);
+            }
+        }
+
+        // --- HANDLE LOGIN ---
+        document.getElementById("loginBtn").addEventListener("click", async () => {
+            const email = document.getElementById("loginEmail").value.trim();
+            const pass = document.getElementById("loginPassword").value;
+
+            if (!email || !pass) {
+                return showAuthMessage("Please enter both email and password.", "error");
+            }
+
+            showAuthMessage("Signing in...", "info");
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+                await checkApproval(userCredential.user);
+            } catch (error) {
+                console.error(error);
+                showAuthMessage("Invalid email or password.", "error");
+            }
+        });
+
+        // --- HANDLE SIGN UP ---
+        document.getElementById("signupBtn").addEventListener("click", async () => {
+            const username = document.getElementById("signupUsername").value.trim();
+            const realName = document.getElementById("signupRealName").value.trim();
+            const email = document.getElementById("signupEmail").value.trim();
+            const pass = document.getElementById("signupPassword").value;
+
+            if (!username || !realName || !email || !pass) {
+                return showAuthMessage("Please fill in all fields.", "error");
+            }
+            if (pass.length < 6) {
+                return showAuthMessage("Password must be at least 6 characters.", "error");
+            }
+
+            showAuthMessage("Creating account...", "info");
+
+            try {
+                // 1. Create the user in Firebase Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                
+                // 2. Save their extra details into Firestore Database
+                await setDoc(doc(db, "users", email.toLowerCase()), {
+                    email: email.toLowerCase(),
+                    username: username,
+                    realName: realName,
+                    approved: false, // Must wait for admin
+                    signupDate: new Date().toISOString()
+                });
+
+                // 3. Show success and immediately sign them out so they wait for approval
+                showAuthMessage("Account created successfully! Please wait for admin approval before logging in.", "success");
+                signOut(auth);
+
+                // Clear the form fields
+                document.getElementById("signupUsername").value = "";
+                document.getElementById("signupRealName").value = "";
+                document.getElementById("signupEmail").value = "";
+                document.getElementById("signupPassword").value = "";
+
+            } catch (error) {
+                console.error(error);
+                // Handle common Firebase errors gracefully
+                if (error.code === 'auth/email-already-in-use') {
+                    showAuthMessage("That email is already registered. Please log in.", "error");
+                } else if (error.code === 'auth/invalid-email') {
+                    showAuthMessage("Please enter a valid email address.", "error");
+                } else {
+                    showAuthMessage(error.message, "error");
+                }
+            }
+        });
+
+        // Check if already logged in (e.g. they refreshed the page)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                checkApproval(user);
             }
         });
     </script>
