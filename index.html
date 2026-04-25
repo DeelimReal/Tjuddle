@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TJuddle</title>
+    <title>TJdle 2025</title>
     <style>
         
         :root {
@@ -143,20 +143,16 @@
 </head>
 <body>
 
-    <div id="splash-screen" class="screen active">
-        <h1 style="font-size: 2.5em; margin-bottom: 10px;">Welcome to TJuddle</h1>
-        <p style="margin-bottom: 30px; color: var(--text-muted); font-size: 1.1em;">The current TJuddle data is not authoritized for use, it will be replaced by Thursday. Please fill out this form to contribute to TJuddle</p>
+    <div id="login-screen" class="screen active">
+        <h1 style="font-size: 2.5em; margin-bottom: 10px;">TJuddle</h1>
+        <p style="margin-bottom: 15px; color: var(--text-muted); font-size: 1.1em;">Please sign in to play.</p>
+        <p style="margin-bottom: 40px; color: var(--btn-hard); font-weight: bold; font-size: 1.1em; background-color: rgba(198, 40, 40, 0.1); padding: 10px; border-radius: 8px; display: inline-block;">⚠️ You MUST use an @students.edu.sg account.</p>
         
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLScAw9_TdCoBHFj2vjDLNlBIDXmOciX0VGqaFa2HRm4e8Grr8w/viewform?fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPNTY3MDY3MzQzMzUyNDI3AAGn6Z900p0QYtvqdR0Q_LrGBC-yZqn4nVl7uP0bmlXTJbqMNICk1Nfi651FriI_aem_fmbqma20imQV6pEZtO8-eA" target="_blank" class="diff-btn btn-daily" style="text-decoration: none; padding: 20px; display: flex; flex-direction: column; align-items: center;">
-            <span style="font-size: 1.2em; margin-bottom: 5px;">📝 Open Google Form</span>
-            <small style="color: rgba(255,255,255,0.8);">(Opens in a new tab)</small>
-        </a>
-
-        <hr style="border-color: var(--border-color); margin: 40px auto; width: 80%; max-width: 300px;">
-
-        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; max-width: 450px; margin: 0 auto;">
-            <button class="btn-action btn-submit" style="padding: 15px; font-size: 1.1em;" onclick="goToMenu()">▶️ Play TJuddle</button>
-            <button id="shareFormBtn" class="btn-action btn-giveup" style="padding: 15px; font-size: 1.1em;" onclick="copyFormLink()">🔗 Share Forms</button>
+        <div style="display: flex; flex-direction: column; align-items: center; max-width: 450px; margin: 0 auto;">
+            <button id="googleLoginBtn" class="btn-action btn-submit" style="padding: 15px; font-size: 1.1em; background-color: #4285F4; width: 100%; max-width: 320px;">
+                🌐 Sign in with Google
+            </button>
+            <p id="login-error" style="color: #d32f2f; margin-top: 20px; font-weight: bold;"></p>
         </div>
     </div>
 
@@ -254,7 +250,7 @@
         let currentRound = 0;
         let totalScore = 0;
         let roundAttempts = 0;
-        let dailyAttemptsHistory = []; // Tracks the 5 digit code
+        let dailyAttemptsHistory = []; 
 
         // DOM Elements
         const screens = document.querySelectorAll('.screen');
@@ -282,44 +278,15 @@
             document.getElementById(screenId).classList.add('active');
         }
 
-        // Functions for the Splash Screen
-        function goToMenu() {
-            showScreen('menu-screen');
-            window.scrollTo(0, 0);
-        }
-
-        function copyFormLink() {
-            const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScAw9_TdCoBHFj2vjDLNlBIDXmOciX0VGqaFa2HRm4e8Grr8w/viewform?fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPNTY3MDY3MzQzMzUyNDI3AAGn6Z900p0QYtvqdR0Q_LrGBC-yZqn4nVl7uP0bmlXTJbqMNICk1Nfi651FriI_aem_fmbqma20imQV6pEZtO8-eA";
-            
-            navigator.clipboard.writeText(formUrl).then(() => {
-                const btn = document.getElementById("shareFormBtn");
-                const originalText = btn.innerText;
-                
-                // Visual feedback
-                btn.innerText = "Copied! ✅";
-                btn.style.backgroundColor = "var(--win-color)";
-                
-                // Revert after 2 seconds
-                setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.style.backgroundColor = "var(--btn-giveup)";
-                }, 2000);
-            }).catch(err => {
-                alert("Failed to copy the link. You can manually copy it here: " + formUrl);
-            });
-        }
-
         function getNameLength(nameStr) {
             return nameStr.replace(/ /g, "").length;
         }
 
-        // Get current Singapore Date string (YYYY-MM-DD)
         function getSGTDateString() {
             let d = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Singapore"}));
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         }
 
-        // Seeded RNG for Daily Mode
         function seededRandom(seed) {
             var t = seed += 0x6D2B79F5;
             t = Math.imul(t ^ t >>> 15, t | 1);
@@ -352,7 +319,7 @@
             if (lastPlayed === getSGTDateString()) {
                 dailyBtn.disabled = true;
                 dailyBtn.innerHTML = "TJ Dailies (Played Today) ✔️<small>Come back tomorrow</small>";
-                viewScoreBtn.style.display = "block"; // Show the score button
+                viewScoreBtn.style.display = "block"; 
             } else {
                 dailyBtn.disabled = false;
                 dailyBtn.innerHTML = "TJ Dailies <small>5 Rounds • Resets Daily</small>";
@@ -443,7 +410,6 @@
 
             let rowHTML = "";
 
-            // --- HARD DIFFICULTY ---
             if (currentMode === 'hard') {
                 let feedback = [];
                 let props = ['Gender', 'Class', 'CCA', 'Name'];
@@ -469,7 +435,6 @@
                     endMatch(true);
                 }
             } 
-            // --- NORMAL, EASY, & DAILY DIFFICULTY ---
             else {
                 let class_feedback = "❌";
                 try {
@@ -512,7 +477,6 @@
                         updateDailyHUD();
                         output.insertAdjacentHTML('beforeend', `<div class="end-msg win">+${roundPoints} Points!</div>`);
                         
-                        // Push attempt digit to array: 'X' if >= 10 attempts
                         let displayAttempt = roundAttempts >= 10 ? 'X' : roundAttempts;
                         dailyAttemptsHistory.push(displayAttempt);
                     } else {
@@ -537,7 +501,7 @@
             let tList = `['${targetAns.Gender}', '${targetAns.Class}', '${targetAns.CCA}', '${targetAns.Name}']`;
             
             if (currentMode === 'daily') {
-                dailyAttemptsHistory.push('0'); // 0 signifies gave up
+                dailyAttemptsHistory.push('0'); 
                 output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">0 Points.<br><span style="font-size: 0.8em">Target: ${targetAns.Name}</span></div>`);
             } else {
                 output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">Target was:<br><span style="font-size: 0.8em">${tList}</span></div>`);
@@ -556,7 +520,6 @@
                 if (currentRound < 5) {
                     nextRoundBtn.style.display = "block";
                 } else {
-                    // Daily Mode Complete - Save data
                     localStorage.setItem("tjdle_last_played", getSGTDateString());
                     localStorage.setItem("tjdle_daily_score", totalScore);
                     localStorage.setItem("tjdle_daily_history", dailyAttemptsHistory.join(''));
@@ -571,12 +534,10 @@
             }
         }
 
-        // Show the End Score Screen (callable from menu too)
         function showScoreScreen() {
             let savedScore = localStorage.getItem("tjdle_daily_score") || "0";
             let savedHistory = localStorage.getItem("tjdle_daily_history") || "00000";
             
-            // Format Date
             let options = { timeZone: "Asia/Singapore", year: 'numeric', month: 'long', day: 'numeric' };
             let readableDate = new Intl.DateTimeFormat('en-US', options).format(new Date());
             document.getElementById("daily-date-display").innerText = readableDate;
@@ -592,6 +553,63 @@
             showScreen('menu-screen');
             window.scrollTo(0, 0);
         }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYDAf13iiTzXq0Z6vEfvn_XJjVpQHLqOM",
+            authDomain: "tjuddle.firebaseapp.com",
+            projectId: "tjuddle",
+            storageBucket: "tjuddle.firebasestorage.app",
+            messagingSenderId: "549602716450",
+            appId: "1:549602716450:web:7f0f2b4c51d8482f5c537b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        const loginBtn = document.getElementById("googleLoginBtn");
+        const errorText = document.getElementById("login-error");
+
+        // Handle the Login Click
+        loginBtn.addEventListener("click", () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    const user = result.user;
+                    
+                    // --- SECURITY CHECK: ENFORCE EMAIL DOMAIN ---
+                    if (!user.email.endsWith("@students.edu.sg")) {
+                        errorText.innerText = "Access Denied: You must use an @students.edu.sg account.";
+                        signOut(auth); 
+                        return;
+                    }
+
+                    // Success!
+                    errorText.innerText = "";
+                    document.getElementById('login-screen').classList.remove('active');
+                    document.getElementById('menu-screen').classList.add('active');
+                })
+                .catch((error) => {
+                    console.error(error);
+                    errorText.innerText = "Sign-in failed. Please try again or check pop-up blocker.";
+                });
+        });
+
+        // Check if already logged in
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                if (user.email.endsWith("@students.edu.sg")) {
+                    document.getElementById('login-screen').classList.remove('active');
+                    document.getElementById('menu-screen').classList.add('active');
+                } else {
+                    signOut(auth);
+                }
+            }
+        });
     </script>
 </body>
 </html>
