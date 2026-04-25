@@ -1004,7 +1004,7 @@ const cohortData = [
         "Gender": "M",
         "Class": "11/25",
         "CCA": "Basketball",
-        "Name": "JAYDEN",
+        "Name": "SEOW HONG RU JAYDEN",
         "Type": "Sports"
     },
     {
