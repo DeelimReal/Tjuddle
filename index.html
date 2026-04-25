@@ -148,7 +148,7 @@
         <p style="margin-bottom: 25px; color: var(--text-muted); font-size: 1.1em;">Please sign in or create an account to play.</p>
         
         <div id="login-form" style="max-width: 350px; margin: 0 auto;">
-            <input type="email" id="loginEmail" placeholder="Email Address" style="margin-bottom: 10px; text-align: center;">
+            <input type="text" id="loginUsername" placeholder="Username" style="margin-bottom: 10px; text-align: center;">
             <input type="password" id="loginPassword" placeholder="Password" style="margin-bottom: 15px; text-align: center;">
             <button id="loginBtn" class="btn-action btn-submit" style="width: 100%; max-width: 350px; margin-bottom: 15px;">Login</button>
             <p style="font-size: 0.9em; color: var(--text-muted);">
@@ -247,6 +247,11 @@
         <div id="daily-code" class="huge-score" style="font-size: 3em; letter-spacing: 10px; color: var(--btn-normal); text-shadow: none;">00000</div>
         <p style="font-size: 12px; color: var(--text-muted);">(0 = Gave Up, X = 10+ Attempts)</p>
         
+        <div id="leaderboard-container" style="margin-top: 40px; text-align: left; max-width: 350px; margin-left: auto; margin-right: auto; background: var(--box-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h3 style="text-align: center; margin-top: 0; color: var(--text-main);">🏆 Today's Leaderboard</h3>
+            <div id="leaderboard-list" style="font-size: 1.1em;">Loading leaderboard...</div>
+        </div>
+
         <div style="margin-top: 40px;">
             <button class="btn-action btn-giveup" style="width: 100%; max-width: 350px;" onclick="returnToMenu()">Back to Menu</button>
         </div>
@@ -292,7 +297,6 @@
             document.getElementById(screenId).classList.add('active');
         }
 
-        // Toggles between Login and Signup forms
         window.toggleAuthMode = function(mode) {
             document.getElementById("auth-message").innerText = "";
             if (mode === 'signup') {
@@ -550,6 +554,11 @@
                     localStorage.setItem("tjdle_daily_score", totalScore);
                     localStorage.setItem("tjdle_daily_history", dailyAttemptsHistory.join(''));
                     
+                    // SAVE SCORE TO FIREBASE LEADERBOARD
+                    if (window.saveDailyScore) {
+                        window.saveDailyScore(totalScore, dailyAttemptsHistory.join(''));
+                    }
+
                     setupMenuButtons();
                     setTimeout(() => {
                         showScoreScreen();
@@ -573,6 +582,11 @@
             
             showScreen('score-screen');
             window.scrollTo(0, 0);
+
+            // Fetch and load the global leaderboard
+            if (window.loadLeaderboard) {
+                window.loadLeaderboard();
+            }
         }
 
         function returnToMenu() {
@@ -583,9 +597,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        // Import Email/Password tools instead of Google Auth
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        // Added Firestore queries for username lookup and leaderboards
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCYDAf13iiTzXq0Z6vEfvn_XJjVpQHLqOM",
@@ -601,6 +615,9 @@
         const db = getFirestore(app);
 
         const authMessage = document.getElementById("auth-message");
+        
+        // Global variable to store who is playing so we can save their score
+        window.loggedInUsername = "";
 
         // Helper function to display messages
         function showAuthMessage(msg, type) {
@@ -610,7 +627,12 @@
             else authMessage.style.color = "var(--text-muted)";
         }
 
-        // Database Verification Function (Checks if admin set approved: true)
+        function getSGTDateString() {
+            let d = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Singapore"}));
+            return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+        }
+
+        // Database Verification Function
         async function checkApproval(user) {
             try {
                 const userEmail = user.email.toLowerCase();
@@ -618,10 +640,11 @@
 
                 if (docSnap.exists() && docSnap.data().approved === true) {
                     showAuthMessage("", "");
+                    window.loggedInUsername = docSnap.data().username; // Save username for leaderboard
                     document.getElementById('login-screen').classList.remove('active');
                     document.getElementById('menu-screen').classList.add('active');
                 } else {
-                    showAuthMessage("Access Denied: Your account is pending admin approval.", "error");
+                    showAuthMessage("DM @deelimreal on instagram or message 83828100 on whatsapp to get your account approved", "error");
                     signOut(auth);
                 }
             } catch (error) {
@@ -631,23 +654,38 @@
             }
         }
 
-        // --- HANDLE LOGIN ---
+        // --- HANDLE USERNAME LOGIN ---
         document.getElementById("loginBtn").addEventListener("click", async () => {
-            const email = document.getElementById("loginEmail").value.trim();
+            const usernameInput = document.getElementById("loginUsername").value.trim();
             const pass = document.getElementById("loginPassword").value;
 
-            if (!email || !pass) {
-                return showAuthMessage("Please enter both email and password.", "error");
+            if (!usernameInput || !pass) {
+                return showAuthMessage("Please enter both username and password.", "error");
             }
 
             showAuthMessage("Signing in...", "info");
 
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+                // Because Firebase uses email/pass, we must look up the user's email based on the username they entered.
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("username", "==", usernameInput));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    return showAuthMessage("Username not found.", "error");
+                }
+
+                let userEmail = "";
+                querySnapshot.forEach((doc) => {
+                    userEmail = doc.data().email;
+                });
+
+                // Now actually log them in
+                const userCredential = await signInWithEmailAndPassword(auth, userEmail, pass);
                 await checkApproval(userCredential.user);
             } catch (error) {
                 console.error(error);
-                showAuthMessage("Invalid email or password.", "error");
+                showAuthMessage("Invalid username or password.", "error");
             }
         });
 
@@ -665,13 +703,23 @@
                 return showAuthMessage("Password must be at least 6 characters.", "error");
             }
 
-            showAuthMessage("Creating account...", "info");
+            showAuthMessage("Checking username...", "info");
 
             try {
-                // 1. Create the user in Firebase Auth
+                // 1. Ensure username is not already taken
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("username", "==", username));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    return showAuthMessage("That username is already taken.", "error");
+                }
+
+                showAuthMessage("Creating account...", "info");
+
+                // 2. Create the user in Firebase Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 
-                // 2. Save their extra details into Firestore Database
+                // 3. Save details into Firestore Database
                 await setDoc(doc(db, "users", email.toLowerCase()), {
                     email: email.toLowerCase(),
                     username: username,
@@ -680,11 +728,11 @@
                     signupDate: new Date().toISOString()
                 });
 
-                // 3. Show success and immediately sign them out so they wait for approval
-                showAuthMessage("Account created successfully! Please wait for admin approval before logging in.", "success");
+                // 4. Show success message explicitly requested and sign them out
+                showAuthMessage("DM @deelimreal on instagram or message 83828100 on whatsapp to get your account approved", "success");
                 signOut(auth);
 
-                // Clear the form fields
+                // Clear fields
                 document.getElementById("signupUsername").value = "";
                 document.getElementById("signupRealName").value = "";
                 document.getElementById("signupEmail").value = "";
@@ -692,7 +740,6 @@
 
             } catch (error) {
                 console.error(error);
-                // Handle common Firebase errors gracefully
                 if (error.code === 'auth/email-already-in-use') {
                     showAuthMessage("That email is already registered. Please log in.", "error");
                 } else if (error.code === 'auth/invalid-email') {
@@ -709,6 +756,79 @@
                 checkApproval(user);
             }
         });
+
+        // --- LEADERBOARD LOGIC ---
+        
+        // Save score to Firebase
+        window.saveDailyScore = async function(score, history) {
+            if (!window.loggedInUsername) return;
+            try {
+                const dateStr = getSGTDateString();
+                const scoreRef = doc(db, "leaderboard", dateStr + "_" + window.loggedInUsername);
+                await setDoc(scoreRef, {
+                    username: window.loggedInUsername,
+                    score: score,
+                    history: history,
+                    date: dateStr,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (e) {
+                console.error("Could not save score to leaderboard:", e);
+            }
+        };
+
+        // Load leaderboard from Firebase
+        window.loadLeaderboard = async function() {
+            const listDiv = document.getElementById("leaderboard-list");
+            listDiv.innerHTML = "Loading...";
+            
+            try {
+                const lbRef = collection(db, "leaderboard");
+                const q = query(lbRef, where("date", "==", getSGTDateString()));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    listDiv.innerHTML = "<div style='text-align:center; color: var(--text-muted);'>No scores yet today. Be the first!</div>";
+                    return;
+                }
+
+                // Gather scores into an array
+                let scores = [];
+                querySnapshot.forEach((doc) => {
+                    scores.push(doc.data());
+                });
+
+                // Sort scores highest to lowest
+                scores.sort((a, b) => b.score - a.score);
+
+                // Build HTML
+                let html = "<div style='display: flex; flex-direction: column; gap: 8px;'>";
+                let rank = 1;
+                
+                // Show top 10
+                scores.slice(0, 10).forEach((data) => {
+                    let medal = "";
+                    if (rank === 1) medal = "🥇";
+                    else if (rank === 2) medal = "🥈";
+                    else if (rank === 3) medal = "🥉";
+                    else medal = `<span style="display:inline-block; width:1.5em; text-align:center;">#${rank}</span>`;
+
+                    html += `
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">
+                        <span>${medal} <strong>${data.username}</strong></span>
+                        <span style="color: var(--win-color); font-weight: bold;">${data.score}</span>
+                    </div>`;
+                    rank++;
+                });
+                
+                html += "</div>";
+                listDiv.innerHTML = html;
+
+            } catch (error) {
+                console.error("Error loading leaderboard:", error);
+                listDiv.innerHTML = "<div style='text-align:center; color: #d32f2f;'>Could not load leaderboard.</div>";
+            }
+        };
     </script>
 </body>
 </html>
