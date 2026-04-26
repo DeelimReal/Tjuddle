@@ -6,11 +6,12 @@
     <title>TJuddle</title>
     <style>
         :root {
-            --bg-color: #f0e6d2;
-            --text-main: #3d3830; 
-            --text-muted: #7a7369; 
-            --box-bg: #fdfaf4; 
-            --border-color: #d1c7b4; 
+            /* Default: For College */
+            --bg-color: #1b4332;
+            --text-main: #f5cc00; /* More Gold */
+            --text-muted: #d1c7b4; 
+            --box-bg: #2d6a4f; 
+            --border-color: #f5cc00; 
             --btn-easy: #2e7d32;
             --btn-normal: #1976d2;
             --btn-hard: #c62828;
@@ -18,7 +19,7 @@
             --btn-giveup: #7d7465;
             --btn-reset: #eab308;
             --btn-versus: #e65100;
-            --win-color: #388e3c;
+            --win-color: #f5cc00;
         }
 
         * { box-sizing: border-box; }
@@ -31,6 +32,23 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             text-align: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        #theme-selector {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+        }
+
+        #theme-dropdown {
+            padding: 5px;
+            border-radius: 4px;
+            background: var(--box-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
         }
         
         #user-badge {
@@ -128,12 +146,24 @@
 </head>
 <body>
 
+    <div id="theme-selector">
+        <select id="theme-dropdown" onchange="changeTheme(this.value)">
+            <option value="college">Theme: For College</option>
+            <option value="nation">Theme: For Nation</option>
+            <option value="alpha">Theme: Alpha</option>
+            <option value="beta">Theme: Beta</option>
+            <option value="gamma">Theme: Gamma</option>
+            <option value="delta">Theme: Delta</option>
+        </select>
+    </div>
+
     <div id="user-badge">
         <span id="logged-in-username-display"></span>
     </div>
 
     <div id="login-screen" class="screen active">
-        <h1 style="font-size: 2.5em; margin-bottom: 10px;">TJuddle</h1>
+        <h1 style="font-size: 2.5em; margin-bottom: 0px;">TJuddle</h1>
+        <p style="margin-top: 0px; margin-bottom: 25px; font-weight: bold;">Where Everybody Knows Your Name</p>
         <p style="margin-bottom: 25px; color: var(--text-muted); font-size: 1.1em;">Please sign in or create an account to play.</p>
         
         <div id="login-form" style="max-width: 350px; margin: 0 auto;">
@@ -160,7 +190,8 @@
     </div>
 
     <div id="menu-screen" class="screen">
-        <h1>TJuddle</h1>
+        <h1 style="margin-bottom: 0px;">TJuddle</h1>
+        <p style="margin-top: 0px; margin-bottom: 25px; font-weight: bold;">Where Everybody Knows Your Name</p>
         <p>made by Dwayne 05/25 </p>
         <p>ig: @deelimreal </p>
         
@@ -329,6 +360,66 @@
     <script src="data.js"></script>
     
     <script>
+        // --- THEME LOGIC ---
+        function changeTheme(theme) {
+            const root = document.documentElement;
+            const themes = {
+                'college': { 
+                    '--bg-color': '#1b4332', 
+                    '--text-main': '#fcc200', 
+                    '--text-muted': '#d1c7b4',
+                    '--box-bg': '#2d6a4f', 
+                    '--border-color': '#fcc200', 
+                    '--btn-normal': '#fcc200'
+                },
+                'nation': { 
+                    '--bg-color': '#f0e6d2', 
+                    '--text-main': '#3d3830', 
+                    '--text-muted': '#7a7369',
+                    '--box-bg': '#fdfaf4', 
+                    '--border-color': '#d1c7b4', 
+                    '--btn-normal': '#1976d2'
+                },
+                'alpha': { 
+                    '--bg-color': '#e3f2fd', 
+                    '--text-main': '#0d47a1', 
+                    '--text-muted': '#5472d3',
+                    '--box-bg': '#ffffff', 
+                    '--border-color': '#bbdefb', 
+                    '--btn-normal': '#1976d2'
+                },
+                'beta': { 
+                    '--bg-color': '#ffebee', 
+                    '--text-main': '#b71c1c', 
+                    '--text-muted': '#f44336',
+                    '--box-bg': '#ffffff', 
+                    '--border-color': '#ffcdd2', 
+                    '--btn-normal': '#d32f2f'
+                },
+                'gamma': { 
+                    '--bg-color': '#fff9c4', 
+                    '--text-main': '#fbc02d', 
+                    '--text-muted': '#212121',
+                    '--box-bg': '#212121', 
+                    '--border-color': '#fbc02d', 
+                    '--btn-normal': '#fbc02d'
+                },
+                'delta': { 
+                    '--bg-color': '#e8f5e9', 
+                    '--text-main': '#2e7d32', 
+                    '--text-muted': '#000000',
+                    '--box-bg': '#000000', 
+                    '--border-color': '#2e7d32', 
+                    '--btn-normal': '#2e7d32'
+                }
+            };
+
+            const selected = themes[theme];
+            for (const prop in selected) {
+                root.style.setProperty(prop, selected[prop]);
+            }
+        }
+
         // --- GAME STATE ---
         let currentMode = "";
         let targetAns = null;
@@ -446,7 +537,10 @@
             }
         }
 
-        window.onload = setupMenuButtons;
+        window.onload = function() {
+            setupMenuButtons();
+            changeTheme('college'); // Initial theme
+        };
 
         // --- GAME LOGIC ---
 
