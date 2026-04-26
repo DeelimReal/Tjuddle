@@ -375,14 +375,6 @@
                 <input type="number" id="lobby-max-lives" value="0" min="0" max="20" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 80px; padding: 8px; text-align: center;">
             </div>
 
-            <div id="setting-win-condition" style="margin-bottom: 10px; display: none; justify-content: space-between; align-items: center;">
-                <label style="font-size: 0.9em; font-weight: bold;">Win Condition:</label>
-                <select id="lobby-win-condition" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 140px; padding: 8px;">
-                    <option value="time">Fastest Time</option>
-                    <option value="guesses" selected>Least Guesses</option>
-                </select>
-            </div>
-
             <p id="lobby-settings-notice" style="font-size: 0.8em; color: var(--text-muted); margin-top: 10px; margin-bottom: 0; text-align: center;">Only the host can change settings.</p>
         </div>
 
@@ -996,6 +988,9 @@
             const code = Math.random().toString(36).substring(2, 6).toUpperCase();
             const roomRef = doc(db, "rooms", code);
             
+            // Create an expiration date 24 hours in the future for auto-deletion
+            const expireDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            
             await setDoc(roomRef, {
                 host: window.loggedInUsername,
                 state: 'lobby', 
@@ -1007,10 +1002,10 @@
                 totalRounds: mode === 'stockpile' ? 3 : null,
                 maxLives: mode === 'blitz' ? 0 : null,
                 timeLimitMin: mode !== 'blitz' ? 0 : null,
-                winCondition: mode === 'mindseye' ? 'guesses' : null,
                 target: null,
                 winners: [],
-                players: { [window.loggedInUsername]: { score: 0, attempts: 0, finished: false, finishTime: 0, roundScore: 0, gotCorrect: false } }
+                players: { [window.loggedInUsername]: { score: 0, attempts: 0, finished: false, finishTime: 0, roundScore: 0, gotCorrect: false } },
+                expireAt: expireDate // Auto-deletion timestamp field
             });
             versusRoomCode = code;
             listenToRoom();
@@ -1042,7 +1037,6 @@
             if(document.getElementById('setting-total-rounds').style.display !== "none") updates.totalRounds = parseInt(document.getElementById('lobby-total-rounds').value) || 3;
             if(document.getElementById('setting-max-lives').style.display !== "none") updates.maxLives = parseInt(document.getElementById('lobby-max-lives').value) || 0;
             if(document.getElementById('setting-time-limit').style.display !== "none") updates.timeLimitMin = parseInt(document.getElementById('lobby-time-limit').value) || 0;
-            if(document.getElementById('setting-win-condition').style.display !== "none") updates.winCondition = document.getElementById('lobby-win-condition').value;
 
             await updateDoc(doc(db, "rooms", versusRoomCode), updates);
         };
@@ -1089,11 +1083,6 @@
                 updates[`players.${window.loggedInUsername}.roundScore`] = calculateStockpilePoints(roundAttempts);
             }
             await updateDoc(doc(db, "rooms", versusRoomCode), updates);
-
-            // If Blitz and got correct, trigger round end immediately
-            if (versusRoomMode === 'blitz' && gotCorrect) {
-                await updateDoc(doc(db, "rooms", versusRoomCode), { state: 'roundEnd', winners: [window.loggedInUsername] });
-            }
         };
 
         window.submitVersusGiveUp = async function() {
@@ -1158,9 +1147,6 @@
 
                     document.getElementById('setting-max-lives').style.display = (data.mode === 'blitz') ? "flex" : "none";
                     if(data.mode === 'blitz') document.getElementById('lobby-max-lives').value = data.maxLives;
-
-                    document.getElementById('setting-win-condition').style.display = (data.mode === 'mindseye') ? "flex" : "none";
-                    if(data.mode === 'mindseye') document.getElementById('lobby-win-condition').value = data.winCondition;
                     
                     if (isHost) {
                         document.querySelectorAll('#versus-settings input, #versus-settings select').forEach(el => el.disabled = false);
@@ -1243,9 +1229,36 @@
                     
                     if (isHost) {
                         let allDone = true;
-                        for(let p in data.players) { if (!data.players[p].finished) allDone = false; }
+                        let blitzWinner = null;
+                        let earliestTime = Infinity;
+
+                        for(let p in data.players) { 
+                            if (!data.players[p].finished) allDone = false; 
+                            
+                            // Check for Blitz winner (first to get it correct)
+                            if (data.mode === 'blitz' && data.players[p].gotCorrect) {
+                                if (data.players[p].finishTime < earliestTime) {
+                                    earliestTime = data.players[p].finishTime;
+                                    blitzWinner = p;
+                                }
+                            }
+                        }
                         
-                        if (allDone && data.mode !== 'blitz') { 
+                        if (data.mode === 'blitz' && blitzWinner) {
+                            let updatedPlayers = {...data.players};
+                            updatedPlayers[blitzWinner].score += 1;
+                            
+                            let gameWinners = [];
+                            for(let p in updatedPlayers) {
+                                if (updatedPlayers[p].score >= data.targetPoints) gameWinners.push(p);
+                            }
+                            
+                            if (gameWinners.length > 0) {
+                                updateDoc(roomRef, { state: 'gameOver', players: updatedPlayers, winners: gameWinners });
+                            } else {
+                                updateDoc(roomRef, { state: 'roundEnd', players: updatedPlayers, winners: [blitzWinner] });
+                            }
+                        } else if (allDone) { 
                             let updatedPlayers = {...data.players};
                             let roundWinners = [];
 
@@ -1257,16 +1270,12 @@
                                 let cand = [];
                                 for(let p in updatedPlayers) {
                                     if(!updatedPlayers[p].gotCorrect) continue;
-                                    let val = data.winCondition === 'time' ? updatedPlayers[p].finishTime : updatedPlayers[p].attempts;
+                                    let val = updatedPlayers[p].attempts; // Mind's Eye always uses Least Guesses now
                                     if(val < bestVal) { bestVal = val; cand = [p]; }
                                     else if(val === bestVal) { cand.push(p); }
                                 }
-                                if(cand.length > 1) { // Tiebreaker
-                                    cand.sort((a,b) => {
-                                        let tbA = data.winCondition === 'time' ? updatedPlayers[a].attempts : updatedPlayers[a].finishTime;
-                                        let tbB = data.winCondition === 'time' ? updatedPlayers[b].attempts : updatedPlayers[b].finishTime;
-                                        return tbA - tbB;
-                                    });
+                                if(cand.length > 1) { // Tiebreaker based on time
+                                    cand.sort((a,b) => updatedPlayers[a].finishTime - updatedPlayers[b].finishTime);
                                 }
                                 if(cand.length > 0) {
                                     let w = cand[0];
@@ -1294,9 +1303,6 @@
                                 if (data.mode === 'mindseye') updateDoc(roomRef, { state: 'summary', players: updatedPlayers, winners: roundWinners });
                                 else updateDoc(roomRef, { state: 'roundEnd', players: updatedPlayers, winners: roundWinners });
                             }
-                        } else if (allDone && data.mode === 'blitz') {
-                            // If all out of lives or gave up in Blitz and no one won
-                            if(data.winners.length === 0) updateDoc(roomRef, { state: 'roundEnd', winners: [] });
                         }
                     }
                 }
