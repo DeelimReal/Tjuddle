@@ -35,9 +35,9 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* --- DYNAMIC THEMED TOP PLAYER BANNER --- */
+        /* --- DYNAMIC TOP PLAYER BANNER --- */
         #top-player-banner {
-            background-color: rgba(0, 0, 0, 0.05); /* Slight tint to differentiate from BG */
+            background-color: rgba(0, 0, 0, 0.05);
             border: 2px solid var(--border-color) !important;
             color: var(--text-main) !important;
             padding: 12px;
@@ -47,7 +47,6 @@
             font-weight: bold;
             font-size: 1.1em;
             text-align: center;
-            transition: border 0.3s ease, color 0.3s ease;
         }
         #top-player-name {
             font-size: 1.3em;
@@ -56,11 +55,15 @@
             margin-top: 5px;
         }
 
-        /* --- PERSISTENT NORMAL DIFFICULTY BUTTON --- */
+        /* --- NORMAL DIFFICULTY BUTTON (WHITE TEXT) --- */
         .btn-normal-fixed {
             background-color: #fcc200 !important;
-            color: #1b4332 !important;
+            color: white !important; /* Specifically requested white */
             border: none;
+        }
+        .btn-normal {
+            background-color: var(--btn-normal);
+            color: white !important;
         }
 
         #theme-selector {
@@ -106,7 +109,6 @@
         .btn-daily { background-color: var(--btn-daily); border: 2px solid #ab47bc; box-shadow: 0 0 10px rgba(142,36,170,0.2); }
         .btn-versus { background-color: var(--btn-versus); border: 2px solid #ff9800; box-shadow: 0 0 10px rgba(230,81,0,0.2); }
         .btn-easy { background-color: var(--btn-easy); }
-        .btn-normal { background-color: var(--btn-normal); }
         .btn-hard { background-color: var(--btn-hard); }
         .diff-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(1.02); }
         .diff-btn small { font-weight: normal; font-size: 13px; display: block; margin-top: 5px; opacity: 0.9; }
@@ -126,7 +128,6 @@
             transition: background-color 0.3s ease;
         }
         input:focus, select:focus { outline: 2px solid var(--btn-normal); }
-        select:disabled, input:disabled { background-color: #ebe5d9; color: #999388; cursor: not-allowed; }
         
         button { padding: 12px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
         .btn-action { color: white; flex: 1; min-width: 140px; max-width: 200px; }
@@ -134,7 +135,6 @@
         .btn-giveup { background-color: var(--btn-giveup); }
         .btn-reset { background-color: var(--btn-reset); color: #000; margin: 30px auto; display: none; width: 100%; max-width: 350px;}
         .btn-next-round { background-color: var(--btn-daily); color: white; margin: 20px auto; display: none; width: 100%; max-width: 350px; }
-        button:disabled { background-color: #dcd3c2; color: #999388; cursor: not-allowed; box-shadow: none; transform: none; }
         
         #output { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
         .guess-row { display: flex; gap: 10px; animation: fadeIn 0.4s ease-in-out; }
@@ -151,8 +151,7 @@
 
         .end-msg { font-size: 20px; font-weight: bold; margin-top: 20px; padding: 15px; border-radius: 8px; }
         .win { background-color: rgba(76, 175, 80, 0.15); color: var(--win-color); border: 1px solid var(--win-color); }
-        .lose { background-color: rgba(220, 53, 69, 0.1); color: #d32f2f; border: 1px solid #d32f2f; }
-        .huge-score { font-size: 4em; color: var(--win-color); margin: 10px 0; font-weight: bold; text-shadow: 0 0 10px rgba(76, 175, 80, 0.2); }
+        .huge-score { font-size: 4em; color: var(--win-color); margin: 10px 0; font-weight: bold; }
         
         @media (max-width: 600px) {
             h1 { font-size: 1.8em; margin-top: 10px;}
@@ -215,7 +214,6 @@
                 Already have an account? <a href="#" onclick="toggleAuthMode('login')" style="color: var(--btn-normal); font-weight: bold;">Log In</a>
             </p>
         </div>
-
         <p id="auth-message" style="margin-top: 20px; font-weight: bold;"></p>
     </div>
 
@@ -223,7 +221,6 @@
         <h1 style="margin-bottom: 0px;">TJuddle</h1>
         <p style="margin-top: 0px; margin-bottom: 25px; font-weight: bold;">Where Everybody Knows Your Name</p>
         <p>made by Dwayne 05/25 </p>
-        <p>ig: @deelimreal </p>
         
         <div id="top-player-banner" style="display: none;">
             Today's Rank #1 TJuddler:<br>
@@ -234,103 +231,19 @@
         
         <button id="dailyBtn" class="diff-btn btn-daily" onclick="startGame('daily')">
             TJ Dailies
-            <small>5 Rounds • SGT 12:00am Reset • Global Daily Target</small>
+            <small>5 Rounds • Resets Daily</small>
         </button>
 
         <button class="diff-btn btn-versus" onclick="showScreen('versus-menu-screen')">
             TJ Versus Mode
-            <small>Multiplayer • Customizable Difficulty</small>
-        </button>
-
-        <button id="viewScoreBtn" class="diff-btn btn-normal" style="background-color: var(--btn-giveup); margin-top: 5px; padding: 10px; display: none;" onclick="showScoreScreen()">
-            View Today's Score
-        </button>
-
-        <button id="leaderboardBtn" class="diff-btn btn-normal" style="background-color: #0288d1; margin-top: 5px; padding: 10px;" onclick="openFullLeaderboard()">
-            Daily Leaderboard
+            <small>Multiplayer</small>
         </button>
 
         <hr style="border-color: var(--border-color); margin: 30px auto; width: 80%; max-width: 300px;">
 
-        <button class="diff-btn btn-easy" onclick="startGame('easy')">
-            Easy (Matters Not Where We are From)
-            <small>Hints in dropdown + partial matches</small>
-        </button>
-        <button class="diff-btn btn-normal btn-normal-fixed" onclick="startGame('normal')">
-            Normal (Blaze Temasek's Flame)
-            <small>Names only + partial matches</small>
-        </button>
-        <button class="diff-btn btn-hard" onclick="startGame('hard')">
-            Hard (ACE TJCian)
-            <small>Strict Exact Matches Only</small>
-        </button>
-
-        <div class="credits">
-            <p> RULES: </p>
-            <p> Desktop reccommended </p>
-            <p> Type a name in the text box to find a student in the drop down list </p>
-            <p> Name: randomly generated name of student from entire cohort </p>
-            <p> Class: CG of Student ranging from 1-18 (↑ means CG number is higher ↓ means CG number is lower)
-            <p> len(x): where x is length of name (↑ means name is longer ↓ means name is shorter)</p>
-            <p> CCA (🟧 means cca type is the same, but wrong CCA) (clubs, sports, arts)</p>
-            <p> Notes:</p>
-            <p> Please share this website responsibly, amongst other TJCians. Data in this website is confidential. </p>
-        </div>
-    </div>
-
-    <div id="full-leaderboard-screen" class="screen">
-        <h2 style="color: #0288d1;">Daily Leaderboard</h2>
-        <p id="full-leaderboard-date" style="font-weight: bold; margin-bottom: 20px; color: var(--text-muted);"></p>
-        <div id="full-leaderboard-list" style="max-width: 350px; margin: 0 auto; background: var(--box-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            Loading leaderboard...
-        </div>
-        <button class="btn-action btn-giveup" style="width: 100%; max-width: 350px; margin-top: 30px;" onclick="window.returnToMenu()">Back to Menu</button>
-    </div>
-
-    <div id="versus-menu-screen" class="screen">
-        <h2 style="color: var(--btn-versus);">TJ Versus Mode</h2>
-        <p style="margin-bottom: 30px; color: var(--text-muted);">Play in real-time with up to 4 friends.</p>
-        <button class="btn-action btn-submit" style="width:100%; max-width:300px; margin-bottom:20px; background-color: var(--btn-versus);" onclick="createVersusRoom()">Create Private Room</button>
-        <div style="background-color: var(--box-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); max-width: 300px; margin: 0 auto;">
-            <p style="margin-top: 0; font-weight: bold;">Join a Room</p>
-            <input type="text" id="joinRoomCode" placeholder="Enter 4-Letter Code" style="text-align:center; text-transform:uppercase; margin-bottom:10px;">
-            <button class="btn-action btn-normal" style="width:100%;" onclick="joinVersusRoom(document.getElementById('joinRoomCode').value)">Join Room</button>
-        </div>
-        <button class="btn-action btn-giveup" style="width:100%; max-width:300px; margin-top:20px;" onclick="window.returnToMenu()">Back</button>
-    </div>
-
-    <div id="lobby-screen" class="screen">
-        <h2>Waiting Room</h2>
-        <p style="font-size: 1.2em;">Room Code: <span id="lobby-code" style="color: var(--btn-versus); font-weight: bold; letter-spacing: 2px;"></span></p>
-        <div id="versus-settings" style="margin: 20px auto; max-width: 300px; background: var(--box-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left;">
-            <p style="margin-top: 0; font-weight: bold; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Room Settings</p>
-            <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                <label style="font-size: 0.9em; font-weight: bold;">Difficulty:</label>
-                <select id="lobby-difficulty" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 140px; padding: 8px;">
-                    <option value="easy">Easy</option>
-                    <option value="normal" selected>Normal</option>
-                    <option value="hard">Hard</option>
-                </select>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <label style="font-size: 0.9em; font-weight: bold;">Points to Win:</label>
-                <input type="number" id="lobby-points" value="3" min="1" max="10" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 80px; padding: 8px; text-align: center;">
-            </div>
-            <p id="lobby-settings-notice" style="font-size: 0.8em; color: var(--text-muted); margin-top: 10px; margin-bottom: 0; text-align: center;">Only the host can change settings.</p>
-        </div>
-        <div style="background-color: var(--box-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); max-width: 300px; margin: 20px auto; text-align: left;">
-            <p style="margin-top: 0; font-weight: bold; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Players (Max 4)</p>
-            <div id="lobby-players" style="font-size:1.1em; font-weight:bold; color: var(--btn-normal);"></div>
-        </div>
-        <button id="startVersusBtn" class="btn-action btn-submit" style="display:none; width:100%; max-width:300px; background-color: var(--win-color);" onclick="startVersusRound()">Start Game</button>
-        <button class="btn-action btn-giveup" style="width:100%; max-width:300px; margin-top:20px;" onclick="leaveVersusRoom()">Leave Room</button>
-    </div>
-
-    <div id="versus-end-screen" class="screen">
-        <h2>Match Complete!</h2>
-        <p style="color: var(--text-muted); margin-top: 30px;">Tournament Winner</p>
-        <div id="versus-winner-name" class="huge-score" style="font-size:3em; color: var(--btn-versus);"></div>
-        <button class="btn-action btn-giveup" style="width: 100%; max-width: 350px; margin-top: 40px;" onclick="leaveVersusRoom()">Back to Menu</button>
+        <button class="diff-btn btn-easy" onclick="startGame('easy')">Easy</button>
+        <button class="diff-btn btn-normal btn-normal-fixed" onclick="startGame('normal')">Normal</button>
+        <button class="diff-btn btn-hard" onclick="startGame('hard')">Hard</button>
     </div>
 
     <div id="game-screen" class="screen">
@@ -338,42 +251,25 @@
         <div id="daily-header" class="game-header" style="display: none;">
             <span id="round-counter">Round 1 / 5</span>
             <span id="score-counter">Score: 0</span>
-            <span id="attempt-counter">Attempts: 0</span>
         </div>
-        <div id="versus-header" style="display: none; flex-direction: column; gap: 5px; margin-bottom: 20px; text-align: left; background: var(--box-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); max-width: 350px; margin-left: auto; margin-right: auto;">
-            <strong style="color: var(--btn-versus); text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Live Match</strong>
-            <div id="versus-players-list" style="font-size: 0.95em; display: flex; flex-direction: column; gap: 4px;"></div>
+        <div id="versus-header" style="display: none; background: var(--box-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); max-width: 350px; margin: 0 auto 20px auto;">
+            <div id="versus-players-list"></div>
         </div>
         <div class="controls">
             <input list="student-names" id="guessInput" placeholder="Choose TJcian" autocomplete="off">
             <datalist id="student-names"></datalist>
-            <button id="submitBtn" class="btn-action btn-submit">Submit Guess</button>
+            <button id="submitBtn" class="btn-action btn-submit">Submit</button>
             <button id="giveUpBtn" class="btn-action btn-giveup">Give Up</button>
         </div>
         <div id="output"></div>
-        <button id="nextRoundBtn" class="btn-next-round" onclick="loadNextDailyRound()">Start Next Round</button>
-        <button id="nextVersusRoundBtn" class="btn-next-round" style="background-color: var(--btn-versus);" onclick="startVersusRound()">Start Next Round</button>
-        <button id="resetBtn" class="btn-reset" onclick="window.returnToMenu()">Return to Menu</button>
-    </div>
-
-    <div id="score-screen" class="screen">
-        <h2>TJ Dailies Complete!</h2>
-        <p id="daily-date-display" style="color: var(--btn-normal); font-weight: bold; margin-top: 5px; font-size: 1.1em;"></p>
-        <p style="color: var(--text-muted); margin-top: 30px;">Your Total Score</p>
-        <div id="final-score" class="huge-score">0</div>
-        <p style="color: var(--text-muted); margin-top: 30px;">Attempt Code</p>
-        <div id="daily-code" class="huge-score" style="font-size: 3em; letter-spacing: 10px; color: var(--btn-normal); text-shadow: none;">00000</div>
-        <p style="font-size: 12px; color: var(--text-muted);">(0 = Gave Up, X = 10+ Attempts)</p>
-        <div style="margin-top: 40px;">
-            <button class="btn-action btn-normal" style="width: 100%; max-width: 350px; margin-bottom: 10px; background-color: #0288d1;" onclick="openFullLeaderboard()">View Full Leaderboard</button>
-            <button class="btn-action btn-giveup" style="width: 100%; max-width: 350px;" onclick="window.returnToMenu()">Back to Menu</button>
-        </div>
+        <button id="nextVersusRoundBtn" class="btn-next-round" style="background-color: var(--btn-versus); display: none;" onclick="startVersusRound()">Next Round</button>
+        <button id="resetBtn" class="btn-reset" onclick="window.returnToMenu()">Menu</button>
     </div>
 
     <script src="data.js"></script>
     
     <script>
-        // --- THEME LOGIC ---
+        // --- UPDATED THEME LOGIC ---
         function changeTheme(theme) {
             const root = document.documentElement;
             const themes = {
@@ -393,484 +289,27 @@
                     '--bg-color': '#ffebee', '--text-main': '#b71c1c', '--text-muted': '#f44336',
                     '--box-bg': '#ffffff', '--border-color': '#ffcdd2', '--btn-normal': '#d32f2f'
                 },
-                // Gamma: Background is yellow, Text is Dark Gold
                 'gamma': { 
                     '--bg-color': '#fff9c4', '--text-main': '#856404', '--text-muted': '#a38b45',
                     '--box-bg': '#ffffff', '--border-color': '#fbc02d', '--btn-normal': '#fbc02d'
                 },
-                // Delta: Background is light green, Text is Dark Green
                 'delta': { 
                     '--bg-color': '#e8f5e9', '--text-main': '#1b5e20', '--text-muted': '#4c8c4a',
                     '--box-bg': '#ffffff', '--border-color': '#2e7d32', '--btn-normal': '#2e7d32'
                 }
             };
-
             const selected = themes[theme];
-            for (const prop in selected) {
-                root.style.setProperty(prop, selected[prop]);
-            }
+            for (const prop in selected) { root.style.setProperty(prop, selected[prop]); }
         }
 
-        // ... rest of game state script logic (unchanged) ...
-        let currentMode = "";
-        let targetAns = null;
-        let dailyTargets = [];
-        let currentRound = 0;
-        let totalScore = 0;
-        let roundAttempts = 0;
-        let dailyAttemptsHistory = []; 
-        let versusDifficulty = "normal";
-        let versusTargetPoints = 3;
-
-        const screens = document.querySelectorAll('.screen');
-        const gameTitle = document.getElementById("game-title");
-        const datalist = document.getElementById("student-names");
-        const input = document.getElementById("guessInput");
-        const submitBtn = document.getElementById("submitBtn");
-        const giveUpBtn = document.getElementById("giveUpBtn");
-        const resetBtn = document.getElementById("resetBtn");
-        const nextRoundBtn = document.getElementById("nextRoundBtn");
-        const nextVersusRoundBtn = document.getElementById("nextVersusRoundBtn");
-        const output = document.getElementById("output");
-        const dailyHeader = document.getElementById("daily-header");
-        const roundCounter = document.getElementById("round-counter");
-        const scoreCounter = document.getElementById("score-counter");
-        const attemptCounter = document.getElementById("attempt-counter");
-        const dailyBtn = document.getElementById("dailyBtn");
-        const viewScoreBtn = document.getElementById("viewScoreBtn");
-
-        function showScreen(screenId) {
-            screens.forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-        window.showScreen = showScreen;
-
-        window.toggleAuthMode = function(mode) {
-            document.getElementById("auth-message").innerText = "";
-            if (mode === 'signup') {
-                document.getElementById("login-form").style.display = "none";
-                document.getElementById("signup-form").style.display = "block";
-            } else {
-                document.getElementById("signup-form").style.display = "none";
-                document.getElementById("login-form").style.display = "block";
-            }
-        }
-
-        window.returnToMenu = function() {
-            showScreen('menu-screen');
-            window.scrollTo(0, 0);
-            if (window.updateTopPlayerBanner) {
-                window.updateTopPlayerBanner();
-            }
-        }
-
-        window.openFullLeaderboard = function() {
-            let options = { timeZone: "Asia/Singapore", weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            let readableDate = new Intl.DateTimeFormat('en-US', options).format(new Date());
-            document.getElementById("full-leaderboard-date").innerText = readableDate;
-            showScreen('full-leaderboard-screen');
-            if (window.fetchAndRenderFullLeaderboard) {
-                window.fetchAndRenderFullLeaderboard();
-            }
-        }
-
-        function getNameLength(nameStr) {
-            return nameStr.replace(/ /g, "").length;
-        }
-
-        function getSGTDateString() {
-            let d = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Singapore"}));
-            return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-        }
-
-        function seededRandom(seed) {
-            var t = seed += 0x6D2B79F5;
-            t = Math.imul(t ^ t >>> 15, t | 1);
-            t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-            return ((t ^ t >>> 14) >>> 0) / 4294967296;
-        }
-
-        function generateDailyTargets() {
-            let dateStr = getSGTDateString();
-            let hash = 0;
-            for (let i = 0; i < dateStr.length; i++) {
-                hash = (hash << 5) - hash + dateStr.charCodeAt(i);
-                hash |= 0;
-            }
-            let targets = [];
-            let seed = hash;
-            let available = [...cohortData]; 
-            for(let i=0; i<5; i++) {
-                seed++;
-                let rnd = seededRandom(seed);
-                let idx = Math.floor(rnd * available.length);
-                targets.push(available.splice(idx, 1)[0]);
-            }
-            return targets.sort(() => Math.random() - 0.5);
-        }
-
-        function setupMenuButtons() {
-            let lastPlayed = localStorage.getItem("tjdle_last_played");
-            if (lastPlayed === getSGTDateString()) {
-                dailyBtn.disabled = true;
-                dailyBtn.innerHTML = "TJ Dailies (Played Today) ✅<small>Come back tomorrow</small>";
-                viewScoreBtn.style.display = "block"; 
-            } else {
-                dailyBtn.disabled = false;
-                dailyBtn.innerHTML = "TJ Dailies <small>5 Rounds • Resets Daily</small>";
-                viewScoreBtn.style.display = "none";
-            }
-        }
-
-        window.onload = function() {
-            setupMenuButtons();
-            changeTheme('college');
+        // Initialize theme
+        window.onload = function() { 
+            if(typeof setupMenuButtons === 'function') setupMenuButtons(); 
+            changeTheme('college'); 
         };
 
-        function startGame(mode) {
-            currentMode = mode;
-            output.innerHTML = "";
-            input.value = "";
-            submitBtn.disabled = false;
-            giveUpBtn.disabled = false;
-            input.disabled = false;
-            resetBtn.style.display = "none";
-            nextRoundBtn.style.display = "none";
-            nextVersusRoundBtn.style.display = "none";
-            document.getElementById('versus-header').style.display = "none";
-            if (mode === 'daily') {
-                dailyTargets = generateDailyTargets();
-                currentRound = 0;
-                totalScore = 0;
-                dailyAttemptsHistory = [];
-                gameTitle.innerText = "--- TJ Dailies ---";
-                dailyHeader.style.display = "flex";
-                loadNextDailyRound();
-            } else {
-                dailyHeader.style.display = "none";
-                targetAns = cohortData[Math.floor(Math.random() * cohortData.length)];
-                if (mode === 'hard') gameTitle.innerText = "--- TJuddle HARD ---";
-                else if (mode === 'easy') gameTitle.innerText = "--- TJuddle EASY ---";
-                else gameTitle.innerText = "--- TJdle 2025 ---";
-            }
-            datalist.innerHTML = "";
-            cohortData.forEach(student => {
-                let option = document.createElement("option");
-                if (mode === 'easy') option.value = `${student.Name} | ${student.Class} | ${student.CCA}`;
-                else option.value = student.Name;
-                datalist.appendChild(option);
-            });
-            showScreen('game-screen');
-            input.focus();
-        }
 
-        function loadNextDailyRound() {
-            targetAns = dailyTargets[currentRound];
-            currentRound++;
-            roundAttempts = 0;
-            output.innerHTML = "";
-            input.value = "";
-            input.disabled = false;
-            submitBtn.disabled = false;
-            giveUpBtn.disabled = false;
-            nextRoundBtn.style.display = "none";
-            updateDailyHUD();
-            input.focus();
-        }
-
-        function updateDailyHUD() {
-            roundCounter.innerText = `Round ${currentRound} / 5`;
-            scoreCounter.innerText = `Score: ${totalScore}`;
-            attemptCounter.innerText = `Attempts: ${roundAttempts}`;
-        }
-
-        submitBtn.addEventListener("click", () => {
-            let rawInput = input.value.trim();
-            if (!rawInput) return;
-            let isEasyMode = (currentMode === 'easy') || (currentMode === 'versus' && versusDifficulty === 'easy');
-            let isHardMode = (currentMode === 'hard') || (currentMode === 'versus' && versusDifficulty === 'hard');
-            let guessName = isEasyMode ? rawInput.split(" | ")[0] : rawInput;
-            let guessObj = cohortData.find(s => s.Name === guessName);
-            if (!guessObj) {
-                alert("Student not found. Please choose from the list.");
-                return;
-            }
-            if (currentMode === 'daily') {
-                roundAttempts++;
-                updateDailyHUD();
-            } else if (currentMode === 'versus') {
-                roundAttempts++;
-                if (window.updateVersusAttempts) window.updateVersusAttempts(roundAttempts);
-            }
-            let rowHTML = "";
-            if (isHardMode) {
-                let feedback = [];
-                let props = ['Gender', 'Class', 'CCA', 'Name'];
-                for (let i = 0; i < 4; i++) {
-                    if (guessObj[props[i]] === targetAns[props[i]]) feedback.push("✅");
-                    else feedback.push("❌");
-                }
-                rowHTML = `
-                    <div class="guess-row hard-grid">
-                        <div class="guess-box name-box"><span class="box-label">Name</span><span class="box-value">${guessObj.Name} ${feedback[3]}</span></div>
-                        <div class="guess-box"><span class="box-label">Class</span><span class="box-value">${guessObj.Class} ${feedback[1]}</span></div>
-                        <div class="guess-box"><span class="box-label">CCA</span><span class="box-value">${guessObj.CCA} ${feedback[2]}</span></div>
-                        <div class="guess-box"><span class="box-label">Gender</span><span class="box-value">${guessObj.Gender} ${feedback[0]}</span></div>
-                        <div class="guess-box" style="display:none;"></div>
-                    </div>
-                `;
-                output.insertAdjacentHTML('beforeend', rowHTML);
-                if (guessObj.Name === targetAns.Name) {
-                    output.insertAdjacentHTML('beforeend', `<div class="end-msg win">winner winner chicken dinner</div>`);
-                    if (currentMode === 'versus') {
-                        if (window.submitVersusFinished) window.submitVersusFinished();
-                        output.insertAdjacentHTML('beforeend', `<div class="end-msg win" style="background-color:rgba(230,81,0,0.1); color:var(--btn-versus); border-color:var(--btn-versus);">Correct! Waiting for other players...</div>`);
-                    }
-                    endMatch(true);
-                }
-            } else {
-                let class_feedback = "❌";
-                try {
-                    let g_num = parseInt(guessObj.Class.split('/')[0]);
-                    let t_num = parseInt(targetAns.Class.split('/')[0]);
-                    if (g_num === t_num) class_feedback = "✅";
-                    else if (g_num < t_num) class_feedback = "↑";
-                    else class_feedback = "↓";
-                } catch(e) {}
-                let gcount = getNameLength(guessObj.Name);
-                let tcount = getNameLength(targetAns.Name);
-                let name_feedback = "";
-                if (gcount === tcount) name_feedback = "🟧";
-                else if (gcount < tcount) name_feedback = "↑";
-                else if (gcount > tcount) name_feedback = "↓";
-                if (guessObj.Name === targetAns.Name) name_feedback = "✅";
-                let cca_feedback = "❌";
-                if (guessObj.CCA === targetAns.CCA) cca_feedback = "✅";
-                else if (guessObj.Type && targetAns.Type && guessObj.Type === targetAns.Type) cca_feedback = "🟧";
-                let gender_feedback = guessObj.Gender === targetAns.Gender ? "✅" : "❌";
-                rowHTML = `
-                    <div class="guess-row">
-                        <div class="guess-box name-box"><span class="box-label">Name</span><span class="box-value">${guessObj.Name}</span></div>
-                        <div class="guess-box"><span class="box-label">Len (${gcount})</span><span class="box-value">${name_feedback}</span></div>
-                        <div class="guess-box"><span class="box-label">Class</span><span class="box-value">${guessObj.Class} ${class_feedback}</span></div>
-                        <div class="guess-box"><span class="box-label">CCA</span><span class="box-value">${guessObj.CCA} ${cca_feedback}</span></div>
-                        <div class="guess-box"><span class="box-label">Gender</span><span class="box-value">${guessObj.Gender} ${gender_feedback}</span></div>
-                    </div>
-                `;
-                output.insertAdjacentHTML('beforeend', rowHTML);
-                if (guessObj.Name === targetAns.Name) {
-                    if (currentMode === 'daily') {
-                        let roundPoints = Math.floor(1000 / roundAttempts);
-                        totalScore += roundPoints;
-                        updateDailyHUD();
-                        output.insertAdjacentHTML('beforeend', `<div class="end-msg win">+${roundPoints} Points!</div>`);
-                        let displayAttempt = roundAttempts >= 10 ? 'X' : roundAttempts;
-                        dailyAttemptsHistory.push(displayAttempt);
-                        endMatch(true);
-                    } else if (currentMode === 'versus') {
-                        if (window.submitVersusFinished) window.submitVersusFinished();
-                        output.insertAdjacentHTML('beforeend', `<div class="end-msg win" style="background-color:rgba(230,81,0,0.1); color:var(--btn-versus); border-color:var(--btn-versus);">Correct! Waiting for other players...</div>`);
-                        endMatch(true);
-                    } else {
-                        output.insertAdjacentHTML('beforeend', `<div class="end-msg win">W fortnite</div>`);
-                        endMatch(true);
-                    }
-                }
-            }
-            input.value = ""; 
-            window.scrollTo(0, document.body.scrollHeight);
-        });
-
-        input.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                submitBtn.click();
-            }
-        });
-
-        giveUpBtn.addEventListener("click", () => {
-            if (currentMode === 'daily') {
-                dailyAttemptsHistory.push('0'); 
-                output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">0 Points.<br><span style="font-size: 0.8em">Target: ${targetAns.Name}</span></div>`);
-            } else if (currentMode === 'versus') {
-                if (window.submitVersusGiveUp) window.submitVersusGiveUp();
-                output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">Waiting for other players...<br><span style="font-size: 0.8em">Target: ${targetAns.Name}</span></div>`);
-            } else {
-                output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">Target was ${targetAns.Name}</div>`);
-            }
-            endMatch(false);
-            window.scrollTo(0, document.body.scrollHeight);
-        });
-
-        function endMatch(won) {
-            submitBtn.disabled = true;
-            giveUpBtn.disabled = true;
-            input.disabled = true;
-            if (currentMode === 'daily') {
-                if (currentRound < 5) {
-                    nextRoundBtn.style.display = "block";
-                } else {
-                    localStorage.setItem("tjdle_last_played", getSGTDateString());
-                    localStorage.setItem("tjdle_daily_score", totalScore);
-                    localStorage.setItem("tjdle_daily_history", dailyAttemptsHistory.join(''));
-                    if (window.saveDailyScore) window.saveDailyScore(totalScore, dailyAttemptsHistory.join(''));
-                    setupMenuButtons();
-                    setTimeout(() => { showScoreScreen(); }, 1500);
-                }
-            } else if (currentMode !== 'versus') {
-                resetBtn.style.display = "block";
-            }
-        }
-
-        function showScoreScreen() {
-            let savedScore = localStorage.getItem("tjdle_daily_score") || "0";
-            let savedHistory = localStorage.getItem("tjdle_daily_history") || "00000";
-            let options = { timeZone: "Asia/Singapore", year: 'numeric', month: 'long', day: 'numeric' };
-            let readableDate = new Intl.DateTimeFormat('en-US', options).format(new Date());
-            document.getElementById("daily-date-display").innerText = readableDate;
-            document.getElementById("final-score").innerText = savedScore;
-            document.getElementById("daily-code").innerText = savedHistory;
-            showScreen('score-screen');
-            window.scrollTo(0, 0);
-        }
     </script>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCYDAf13iiTzXq0Z6vEfvn_XJjVpQHLqOM",
-            authDomain: "tjuddle.firebaseapp.com",
-            projectId: "tjuddle",
-            storageBucket: "tjuddle.firebasestorage.app",
-            messagingSenderId: "549602716450",
-            appId: "1:549602716450:web:7f0f2b4c51d8482f5c537b"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        const authMessage = document.getElementById("auth-message");
-        window.loggedInUsername = "";
-
-        function showAuthMessage(msg, type) {
-            authMessage.innerText = msg;
-            if (type === "error") authMessage.style.color = "#d32f2f";
-            else if (type === "success") authMessage.style.color = "#2e7d32";
-            else authMessage.style.color = "#555";
-        }
-
-        function getSGTDateString() {
-            let d = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Singapore"}));
-            return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-        }
-
-        window.updateTopPlayerBanner = async function() {
-            const banner = document.getElementById("top-player-banner");
-            const nameSpan = document.getElementById("top-player-name");
-            try {
-                const q = query(collection(db, "leaderboard"), where("date", "==", getSGTDateString()));
-                const querySnapshot = await getDocs(q);
-                if (querySnapshot.empty) { banner.style.display = "none"; return; }
-                let scores = [];
-                querySnapshot.forEach((doc) => scores.push(doc.data()));
-                scores.sort((a, b) => b.score - a.score); 
-                nameSpan.innerText = scores[0].username;
-                banner.style.display = "block";
-            } catch (e) { console.error(e); banner.style.display = "none"; }
-        };
-
-        async function checkApproval(user) {
-            try {
-                const docSnap = await getDoc(doc(db, "users", user.email.toLowerCase()));
-                if (docSnap.exists() && docSnap.data().approved === true) {
-                    showAuthMessage("", "");
-                    window.loggedInUsername = docSnap.data().username; 
-                    document.getElementById('logged-in-username-display').innerText = window.loggedInUsername;
-                    document.getElementById('user-badge').style.display = "block";
-                    document.getElementById('login-screen').classList.remove('active');
-                    document.getElementById('menu-screen').classList.add('active');
-                    window.updateTopPlayerBanner();
-                } else {
-                    showAuthMessage("DM @deelimreal or message 83828100 to get approved", "error");
-                    signOut(auth);
-                }
-            } catch (error) { signOut(auth); }
-        }
-
-        document.getElementById("loginBtn").addEventListener("click", async () => {
-            const usernameInput = document.getElementById("loginUsername").value.trim();
-            const pass = document.getElementById("loginPassword").value;
-            if (!usernameInput || !pass) return showAuthMessage("Please enter both.", "error");
-            try {
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("username", "==", usernameInput));
-                const querySnapshot = await getDocs(q);
-                if (querySnapshot.empty) return showAuthMessage("Username not found.", "error");
-                let userEmail = "";
-                querySnapshot.forEach((doc) => { userEmail = doc.data().email; });
-                const userCredential = await signInWithEmailAndPassword(auth, userEmail, pass);
-                await checkApproval(userCredential.user);
-            } catch (error) { showAuthMessage("Invalid credentials.", "error"); }
-        });
-
-        document.getElementById("signupBtn").addEventListener("click", async () => {
-            const username = document.getElementById("signupUsername").value.trim();
-            const realName = document.getElementById("signupRealName").value.trim();
-            const email = document.getElementById("signupEmail").value.trim();
-            const pass = document.getElementById("signupPassword").value;
-            if (!username || !realName || !email || !pass) return showAuthMessage("Fill all fields.", "error");
-            try {
-                const q = query(collection(db, "users"), where("username", "==", username));
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) return showAuthMessage("Username taken.", "error");
-                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", email.toLowerCase()), {
-                    email: email.toLowerCase(), username: username, realName: realName,
-                    approved: false, signupDate: new Date().toISOString()
-                });
-                showAuthMessage("Waiting for approval...", "success");
-                signOut(auth);
-            } catch (error) { showAuthMessage(error.message, "error"); }
-        });
-
-        onAuthStateChanged(auth, (user) => { if (user) checkApproval(user); });
-
-        window.saveDailyScore = async function(score, history) {
-            if (!window.loggedInUsername) return;
-            const dateStr = getSGTDateString();
-            await setDoc(doc(db, "leaderboard", dateStr + "_" + window.loggedInUsername), {
-                username: window.loggedInUsername, score: score, history: history,
-                date: dateStr, timestamp: new Date().toISOString()
-            });
-            window.updateTopPlayerBanner();
-        };
-
-        window.fetchAndRenderFullLeaderboard = async function() {
-            const listDiv = document.getElementById("full-leaderboard-list");
-            try {
-                const q = query(collection(db, "leaderboard"), where("date", "==", getSGTDateString()));
-                const querySnapshot = await getDocs(q);
-                if (querySnapshot.empty) { listDiv.innerHTML = "No scores yet."; return; }
-                let scores = [];
-                querySnapshot.forEach((doc) => scores.push(doc.data()));
-                scores.sort((a, b) => b.score - a.score); 
-                let html = "<div>";
-                scores.forEach((data, i) => {
-                    html += `<div>#${i+1} <strong>${data.username}</strong>: ${data.score}</div>`;
-                });
-                listDiv.innerHTML = html + "</div>";
-            } catch (error) { listDiv.innerHTML = "Error loading."; }
-        };
-
-        // Versus Multiplayer (Placeholder logic to match previous structure)
-        window.createVersusRoom = async () => { /* logic */ };
-        window.joinVersusRoom = async (code) => { /* logic */ };
-        window.startVersusRound = async () => { /* logic */ };
-        window.leaveVersusRoom = () => { location.reload(); };
-    </script>
-</body>
+    </body>
 </html>
