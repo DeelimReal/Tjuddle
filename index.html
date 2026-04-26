@@ -948,9 +948,14 @@
             if (!window.loggedInUsername) return;
             try {
                 const dateStr = getSGTDateString();
+                
+                // Create an expiration date 48 hours in the future for auto-deletion
+                const expireDate = new Date(Date.now() + 48 * 60 * 60 * 1000); 
+
                 await setDoc(doc(db, "leaderboard", dateStr + "_" + window.loggedInUsername), {
                     username: window.loggedInUsername, score: score, history: history,
-                    date: dateStr, timestamp: new Date().toISOString()
+                    date: dateStr, timestamp: new Date().toISOString(),
+                    expireAt: expireDate // Auto-deletion timestamp field for leaderboard
                 });
                 window.updateTopPlayerBanner();
             } catch (e) { console.error(e); }
