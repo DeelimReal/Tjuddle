@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,11 +6,12 @@
     <title>TJuddle</title>
     <style>
         :root {
-            --bg-color: #f0e6d2;
-            --text-main: #3d3830; 
-            --text-muted: #7a7369; 
-            --box-bg: #fdfaf4; 
-            --border-color: #d1c7b4; 
+            /* Default: For College */
+            --bg-color: #1b4332;
+            --text-main: #f5cc00; 
+            --text-muted: #d1c7b4; 
+            --box-bg: #2d6a4f; 
+            --border-color: #f5cc00; 
             --btn-easy: #2e7d32;
             --btn-normal: #1976d2;
             --btn-hard: #c62828;
@@ -19,7 +19,7 @@
             --btn-giveup: #7d7465;
             --btn-reset: #eab308;
             --btn-versus: #e65100;
-            --win-color: #388e3c;
+            --win-color: #f5cc00;
         }
 
         * { box-sizing: border-box; }
@@ -32,6 +32,53 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             text-align: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        #top-player-banner {
+            background-color: rgba(0, 0, 0, 0.05);
+            border: 2px solid var(--border-color) !important;
+            color: var(--text-main) !important;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px auto 25px auto;
+            max-width: 320px;
+            font-weight: bold;
+            font-size: 1.1em;
+            text-align: center;
+            transition: border 0.3s ease, color 0.3s ease;
+        }
+        #top-player-name {
+            font-size: 1.3em;
+            color: var(--text-main) !important;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .btn-normal-fixed {
+            background-color: #1976d2 !important;
+            color: white !important;
+            border: none;
+        }
+        .btn-normal {
+            background-color: var(--btn-normal);
+            color: white !important;
+        }
+
+        #theme-selector {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+        }
+
+        #theme-dropdown {
+            padding: 5px;
+            border-radius: 4px;
+            background: var(--box-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
         }
         
         #user-badge {
@@ -61,7 +108,6 @@
         .btn-daily { background-color: var(--btn-daily); border: 2px solid #ab47bc; box-shadow: 0 0 10px rgba(142,36,170,0.2); }
         .btn-versus { background-color: var(--btn-versus); border: 2px solid #ff9800; box-shadow: 0 0 10px rgba(230,81,0,0.2); }
         .btn-easy { background-color: var(--btn-easy); }
-        .btn-normal { background-color: var(--btn-normal); }
         .btn-hard { background-color: var(--btn-hard); }
         .diff-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(1.02); }
         .diff-btn small { font-weight: normal; font-size: 13px; display: block; margin-top: 5px; opacity: 0.9; }
@@ -78,6 +124,7 @@
             border: 1px solid var(--border-color); border-radius: 6px;
             background-color: var(--box-bg); color: var(--text-main);
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); 
+            transition: background-color 0.3s ease;
         }
         input:focus, select:focus { outline: 2px solid var(--btn-normal); }
         select:disabled, input:disabled { background-color: #ebe5d9; color: #999388; cursor: not-allowed; }
@@ -97,6 +144,7 @@
             border-radius: 8px; padding: 12px 8px; flex: 1; display: flex;
             flex-direction: column; justify-content: center; align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.04); text-align: center;
+            transition: background-color 0.3s ease;
         }
         .box-label { font-size: 0.70em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
         .box-value { font-size: 1.05em; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; word-break: break-word; }
@@ -107,6 +155,29 @@
         .lose { background-color: rgba(220, 53, 69, 0.1); color: #d32f2f; border: 1px solid #d32f2f; }
         .huge-score { font-size: 4em; color: var(--win-color); margin: 10px 0; font-weight: bold; text-shadow: 0 0 10px rgba(76, 175, 80, 0.2); }
         
+        #countdown-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); color: white; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; text-align: center; padding: 20px;
+        }
+        #countdown-timer { font-size: 8em; font-weight: bold; color: var(--win-color); margin-bottom: 20px;}
+        #countdown-quote { font-size: 1.2em; font-style: italic; max-width: 600px; color: #ccc; }
+
+        #stopwatch-display {
+            font-size: 1.5em; font-weight: bold; font-family: monospace;
+            background: var(--box-bg); padding: 5px 15px; border-radius: 8px;
+            border: 2px solid var(--win-color); display: inline-block; margin-bottom: 15px;
+        }
+
+        #summary-screen table {
+            width: 100%; max-width: 400px; margin: 20px auto; border-collapse: collapse;
+        }
+        #summary-screen th, #summary-screen td {
+            border: 1px solid var(--border-color); padding: 10px; text-align: center;
+        }
+        #summary-screen th { background-color: var(--box-bg); }
+
         @media (max-width: 600px) {
             h1 { font-size: 1.8em; margin-top: 10px;}
             .controls { flex-direction: column; align-items: center; }
@@ -114,7 +185,7 @@
             .guess-row {
                 display: grid; grid-template-columns: 1fr 1fr; 
                 grid-template-areas: "name name" "len class" "cca gender";
-                gap: 8px; background-color: rgba(0,0,0,0.02); padding: 10px; border-radius: 10px;
+                gap: 8px; padding: 10px; border-radius: 10px;
             }
             .guess-box:nth-child(1) { grid-area: name; padding: 15px;}
             .guess-box:nth-child(2) { grid-area: len; }
@@ -129,12 +200,29 @@
 </head>
 <body>
 
+    <div id="theme-selector">
+        <select id="theme-dropdown" onchange="changeTheme(this.value)">
+            <option value="college">Theme: For College</option>
+            <option value="nation">Theme: For Nation</option>
+            <option value="alpha">Theme: Alpha</option>
+            <option value="beta">Theme: Beta</option>
+            <option value="gamma">Theme: Gamma</option>
+            <option value="delta">Theme: Delta</option>
+        </select>
+    </div>
+
+    <div id="countdown-overlay">
+        <div id="countdown-timer">3</div>
+        <div id="countdown-quote"></div>
+    </div>
+
     <div id="user-badge">
         <span id="logged-in-username-display"></span>
     </div>
 
     <div id="login-screen" class="screen active">
-        <h1 style="font-size: 2.5em; margin-bottom: 10px;">TJuddle</h1>
+        <h1 style="font-size: 2.5em; margin-bottom: 0px;">TJuddle</h1>
+        <p style="margin-top: 0px; margin-bottom: 25px; font-weight: bold;">Where Everybody Knows Your Name</p>
         <p style="margin-bottom: 25px; color: var(--text-muted); font-size: 1.1em;">Please sign in or create an account to play.</p>
         
         <div id="login-form" style="max-width: 350px; margin: 0 auto;">
@@ -156,18 +244,17 @@
                 Already have an account? <a href="#" onclick="toggleAuthMode('login')" style="color: var(--btn-normal); font-weight: bold;">Log In</a>
             </p>
         </div>
-
         <p id="auth-message" style="margin-top: 20px; font-weight: bold;"></p>
     </div>
 
     <div id="menu-screen" class="screen">
-        <h1>TJuddle</h1>
+        <h1 style="margin-bottom: 0px;">TJuddle</h1>
+        <p style="margin-top: 0px; margin-bottom: 25px; font-weight: bold;">Where Everybody Knows Your Name</p>
         <p>made by Dwayne 05/25 </p>
-        <p>ig: @deelimreal </p>
         
-        <div id="top-player-banner" style="display: none; background-color: rgba(56, 142, 60, 0.1); border: 2px solid var(--win-color); color: var(--win-color); padding: 12px; border-radius: 8px; margin: 15px auto 25px auto; max-width: 320px; font-weight: bold; font-size: 1.1em; text-align: center;">
+        <div id="top-player-banner" style="display: none;">
             Today's Rank #1 TJuddler:<br>
-            <span id="top-player-name" style="font-size: 1.3em; color: var(--text-main); display: block; margin-top: 5px;">Loading...</span>
+            <span id="top-player-name">Loading...</span>
         </div>
 
         <p style="margin-bottom: 20px; color: var(--text-muted);">Select your game mode:</p>
@@ -196,7 +283,7 @@
             Easy (Matters Not Where We are From)
             <small>Hints in dropdown + partial matches</small>
         </button>
-        <button class="diff-btn btn-normal" onclick="startGame('normal')">
+        <button class="diff-btn btn-normal btn-normal-fixed" onclick="startGame('normal')">
             Normal (Blaze Temasek's Flame)
             <small>Names only + partial matches</small>
         </button>
@@ -204,36 +291,22 @@
             Hard (ACE TJCian)
             <small>Strict Exact Matches Only</small>
         </button>
-
-        <div class="credits">
-            <p> RULES: </p>
-            <p> Desktop reccommended </p>
-            <p> Type a name in the text box to find a student in the drop down list </p>
-            <p> Name: randomly generated name of student from entire cohort </p>
-            <p> Class: CG of Student ranging from 1-18 (↑ means CG number is higher ↓ means CG number is lower)
-            <p> len(x): where x is length of name (↑ means name is longer ↓ means name is shorter)</p>
-            <p> CCA (🟧 means cca type is the same, but wrong CCA) (clubs, sports, arts)</p>
-            <p> Notes:</p>
-            <p> Please share this website responsibly, amongst other TJCians. Data in this website is confidential. </p>
-        </div>
     </div>
 
     <div id="full-leaderboard-screen" class="screen">
         <h2 style="color: #0288d1;">Daily Leaderboard</h2>
         <p id="full-leaderboard-date" style="font-weight: bold; margin-bottom: 20px; color: var(--text-muted);"></p>
-        
         <div id="full-leaderboard-list" style="max-width: 350px; margin: 0 auto; background: var(--box-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
             Loading leaderboard...
         </div>
-
         <button class="btn-action btn-giveup" style="width: 100%; max-width: 350px; margin-top: 30px;" onclick="window.returnToMenu()">Back to Menu</button>
     </div>
 
     <div id="versus-menu-screen" class="screen">
         <h2 style="color: var(--btn-versus);">TJ Versus Mode</h2>
-        <p style="margin-bottom: 30px; color: var(--text-muted);">Play in real-time with up to 4 friends.</p>
+        <p style="margin-bottom: 30px; color: var(--text-muted);">Play in real-time with your friends.</p>
 
-        <button class="btn-action btn-submit" style="width:100%; max-width:300px; margin-bottom:20px; background-color: var(--btn-versus);" onclick="createVersusRoom()">Create Private Room</button>
+        <button class="btn-action btn-submit" style="width:100%; max-width:300px; margin-bottom:20px; background-color: var(--btn-versus);" onclick="showScreen('versus-mode-select-screen')">Create Private Room</button>
         
         <div style="background-color: var(--box-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); max-width: 300px; margin: 0 auto;">
             <p style="margin-top: 0; font-weight: bold;">Join a Room</p>
@@ -244,12 +317,35 @@
         <button class="btn-action btn-giveup" style="width:100%; max-width:300px; margin-top:20px;" onclick="window.returnToMenu()">Back</button>
     </div>
 
+    <div id="versus-mode-select-screen" class="screen">
+        <h2 style="color: var(--btn-versus);">Select Game Mode</h2>
+        <button class="diff-btn btn-versus" onclick="createVersusRoom('blitz')">
+            Blitz
+            <small>Winner by least time. First to answer ends the round.</small>
+        </button>
+        <button class="diff-btn btn-daily" onclick="createVersusRoom('mindseye')">
+            Mind's Eye
+            <small>Attempts are hidden. Details shown at end of round.</small>
+        </button>
+        <button class="diff-btn btn-normal" style="background-color: #0288d1;" onclick="createVersusRoom('stockpile')">
+            Stockpile
+            <small>Accumulate points over set rounds.</small>
+        </button>
+        <button class="btn-action btn-giveup" style="width:100%; max-width:300px; margin-top:20px;" onclick="showScreen('versus-menu-screen')">Back</button>
+    </div>
+
     <div id="lobby-screen" class="screen">
-        <h2>Waiting Room</h2>
+        <h2>Waiting Room (<span id="lobby-mode-name"></span>)</h2>
         <p style="font-size: 1.2em;">Room Code: <span id="lobby-code" style="color: var(--btn-versus); font-weight: bold; letter-spacing: 2px;"></span></p>
         
-        <div id="versus-settings" style="margin: 20px auto; max-width: 300px; background: var(--box-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left;">
+        <div id="versus-settings" style="margin: 20px auto; max-width: 350px; background: var(--box-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left;">
             <p style="margin-top: 0; font-weight: bold; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Room Settings</p>
+            
+            <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <label style="font-size: 0.9em; font-weight: bold;">Player Limit:</label>
+                <input type="number" id="lobby-player-limit" value="4" min="2" max="20" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 80px; padding: 8px; text-align: center;">
+            </div>
+
             <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                 <label style="font-size: 0.9em; font-weight: bold;">Difficulty:</label>
                 <select id="lobby-difficulty" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 140px; padding: 8px;">
@@ -258,20 +354,54 @@
                     <option value="hard">Hard</option>
                 </select>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            
+            <div id="setting-points-win" style="margin-bottom: 10px; display: none; justify-content: space-between; align-items: center;">
                 <label style="font-size: 0.9em; font-weight: bold;">Points to Win:</label>
-                <input type="number" id="lobby-points" value="3" min="1" max="10" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 80px; padding: 8px; text-align: center;">
+                <input type="number" id="lobby-points" value="3" min="1" max="20" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 80px; padding: 8px; text-align: center;">
             </div>
+
+            <div id="setting-total-rounds" style="margin-bottom: 10px; display: none; justify-content: space-between; align-items: center;">
+                <label style="font-size: 0.9em; font-weight: bold;">Total Rounds:</label>
+                <input type="number" id="lobby-total-rounds" value="3" min="3" max="20" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 80px; padding: 8px; text-align: center;">
+            </div>
+
+            <div id="setting-time-limit" style="margin-bottom: 10px; display: none; justify-content: space-between; align-items: center;">
+                <label style="font-size: 0.9em; font-weight: bold;">Time Limit (Mins, 0=None):</label>
+                <input type="number" id="lobby-time-limit" value="0" min="0" max="10" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 80px; padding: 8px; text-align: center;">
+            </div>
+
+            <div id="setting-max-lives" style="margin-bottom: 10px; display: none; justify-content: space-between; align-items: center;">
+                <label style="font-size: 0.9em; font-weight: bold;">Max Guesses (0=None):</label>
+                <input type="number" id="lobby-max-lives" value="0" min="0" max="20" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 80px; padding: 8px; text-align: center;">
+            </div>
+
+            <div id="setting-win-condition" style="margin-bottom: 10px; display: none; justify-content: space-between; align-items: center;">
+                <label style="font-size: 0.9em; font-weight: bold;">Win Condition:</label>
+                <select id="lobby-win-condition" onchange="if(window.updateRoomSettings) window.updateRoomSettings()" disabled style="width: 140px; padding: 8px;">
+                    <option value="time">Fastest Time</option>
+                    <option value="guesses" selected>Least Guesses</option>
+                </select>
+            </div>
+
             <p id="lobby-settings-notice" style="font-size: 0.8em; color: var(--text-muted); margin-top: 10px; margin-bottom: 0; text-align: center;">Only the host can change settings.</p>
         </div>
 
-        <div style="background-color: var(--box-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); max-width: 300px; margin: 20px auto; text-align: left;">
-            <p style="margin-top: 0; font-weight: bold; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Players (Max 4)</p>
+        <div style="background-color: var(--box-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); max-width: 350px; margin: 20px auto; text-align: left;">
+            <p style="margin-top: 0; font-weight: bold; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Players</p>
             <div id="lobby-players" style="font-size:1.1em; font-weight:bold; color: var(--btn-normal);"></div>
         </div>
 
-        <button id="startVersusBtn" class="btn-action btn-submit" style="display:none; width:100%; max-width:300px; background-color: var(--win-color);" onclick="startVersusRound()">Start Game</button>
-        <button class="btn-action btn-giveup" style="width:100%; max-width:300px; margin-top:20px;" onclick="leaveVersusRoom()">Leave Room</button>
+        <button id="startVersusBtn" class="btn-action btn-submit" style="display:none; width:100%; max-width:350px; background-color: var(--win-color);" onclick="startVersusRound()">Start Game</button>
+        <button class="btn-action btn-giveup" style="width:100%; max-width:350px; margin-top:20px;" onclick="leaveVersusRoom()">Leave Room</button>
+    </div>
+
+    <div id="versus-summary-screen" class="screen">
+        <h2>Round Complete!</h2>
+        <h3 id="summary-winner-text" style="color: var(--win-color);"></h3>
+        <p>The target was <strong id="summary-target-name"></strong></p>
+        <div id="summary-table-container"></div>
+        <button id="summaryNextRoundBtn" class="btn-action btn-submit" style="display:none; width: 100%; max-width: 350px; margin-top: 20px;" onclick="startVersusRound()">Start Next Round</button>
+        <p id="summary-waiting-text" style="color: var(--text-muted); margin-top: 20px; display: none;">Waiting for host...</p>
     </div>
 
     <div id="versus-end-screen" class="screen">
@@ -284,6 +414,8 @@
     <div id="game-screen" class="screen">
         <h2 id="game-title">TJdle 2025</h2>
         
+        <div id="stopwatch-display" style="display: none;">00:00.0</div>
+
         <div id="daily-header" class="game-header" style="display: none;">
             <span id="round-counter">Round 1 / 5</span>
             <span id="score-counter">Score: 0</span>
@@ -330,20 +462,35 @@
     <script src="data.js"></script>
     
     <script>
+        function changeTheme(theme) {
+            const root = document.documentElement;
+            const themes = {
+                'college': { '--bg-color': '#1b4332', '--text-main': '#fcc200', '--text-muted': '#d1c7b4', '--box-bg': '#2d6a4f', '--border-color': '#fcc200', '--btn-normal': '#fcc200' },
+                'nation': { '--bg-color': '#f0e6d2', '--text-main': '#3d3830', '--text-muted': '#7a7369', '--box-bg': '#fdfaf4', '--border-color': '#d1c7b4', '--btn-normal': '#1976d2' },
+                'alpha': { '--bg-color': '#e3f2fd', '--text-main': '#0d47a1', '--text-muted': '#5472d3', '--box-bg': '#ffffff', '--border-color': '#bbdefb', '--btn-normal': '#1976d2' },
+                'beta': { '--bg-color': '#ffebee', '--text-main': '#b71c1c', '--text-muted': '#f44336', '--box-bg': '#ffffff', '--border-color': '#ffcdd2', '--btn-normal': '#d32f2f' },
+                'gamma': { '--bg-color': '#fff9c4', '--text-main': '#856404', '--text-muted': '#a38b45', '--box-bg': '#ffffff', '--border-color': '#fbc02d', '--btn-normal': '#fbc02d' },
+                'delta': { '--bg-color': '#e8f5e9', '--text-main': '#1b5e20', '--text-muted': '#4c8c4a', '--box-bg': '#ffffff', '--border-color': '#2e7d32', '--btn-normal': '#2e7d32' }
+            };
+            const selected = themes[theme];
+            for (const prop in selected) { root.style.setProperty(prop, selected[prop]); }
+        }
+
         // --- GAME STATE ---
         let currentMode = "";
         let targetAns = null;
         
-        // Daily Mode State
         let dailyTargets = [];
         let currentRound = 0;
         let totalScore = 0;
         let roundAttempts = 0;
         let dailyAttemptsHistory = []; 
 
-        // Versus State Settings
         let versusDifficulty = "normal";
-        let versusTargetPoints = 3;
+        let versusRoomMode = "";
+        let versusMaxLives = 0;
+        let versusRoundStartTime = 0;
+        let versusTimeLimitMin = 0;
 
         const screens = document.querySelectorAll('.screen');
         const gameTitle = document.getElementById("game-title");
@@ -382,31 +529,22 @@
         window.returnToMenu = function() {
             showScreen('menu-screen');
             window.scrollTo(0, 0);
-            if (window.updateTopPlayerBanner) {
-                window.updateTopPlayerBanner();
-            }
+            if (window.updateTopPlayerBanner) window.updateTopPlayerBanner();
         }
 
         window.openFullLeaderboard = function() {
             let options = { timeZone: "Asia/Singapore", weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             let readableDate = new Intl.DateTimeFormat('en-US', options).format(new Date());
             document.getElementById("full-leaderboard-date").innerText = readableDate;
-            
             showScreen('full-leaderboard-screen');
-            if (window.fetchAndRenderFullLeaderboard) {
-                window.fetchAndRenderFullLeaderboard();
-            }
+            if (window.fetchAndRenderFullLeaderboard) window.fetchAndRenderFullLeaderboard();
         }
 
-        function getNameLength(nameStr) {
-            return nameStr.replace(/ /g, "").length;
-        }
-
+        function getNameLength(nameStr) { return nameStr.replace(/ /g, "").length; }
         function getSGTDateString() {
             let d = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Singapore"}));
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         }
-
         function seededRandom(seed) {
             var t = seed += 0x6D2B79F5;
             t = Math.imul(t ^ t >>> 15, t | 1);
@@ -424,7 +562,6 @@
             let targets = [];
             let seed = hash;
             let available = [...cohortData]; 
-            
             for(let i=0; i<5; i++) {
                 seed++;
                 let rnd = seededRandom(seed);
@@ -442,14 +579,20 @@
                 viewScoreBtn.style.display = "block"; 
             } else {
                 dailyBtn.disabled = false;
-                dailyBtn.innerHTML = "TJ Dailies <small>5 Rounds • Resets Daily</small>";
+                dailyBtn.innerHTML = "TJ Dailies <small>5 Rounds • SGT 12:00am Reset • Global Daily Target</small>";
                 viewScoreBtn.style.display = "none";
             }
         }
 
-        window.onload = setupMenuButtons;
+        window.onload = function() {
+            changeTheme('college');
+            setupMenuButtons();
+        };
 
-        // --- GAME LOGIC ---
+        function calculateStockpilePoints(attempts) {
+            let pts = Math.floor((Math.pow(22 - 2 * attempts, 3) + 2000) / 5);
+            return Math.max(0, pts);
+        }
 
         function startGame(mode) {
             currentMode = mode;
@@ -462,6 +605,7 @@
             nextRoundBtn.style.display = "none";
             nextVersusRoundBtn.style.display = "none";
             document.getElementById('versus-header').style.display = "none";
+            document.getElementById('stopwatch-display').style.display = "none";
 
             if (mode === 'daily') {
                 dailyTargets = generateDailyTargets();
@@ -513,6 +657,23 @@
             attemptCounter.innerText = `Attempts: ${roundAttempts}`;
         }
 
+        // Global interval for Stopwatch & Time limits
+        setInterval(() => {
+            if(currentMode === 'versus' && document.getElementById('game-screen').classList.contains('active')) {
+                let elapsed = Date.now() - versusRoundStartTime;
+                if(versusRoomMode === 'blitz') {
+                    let date = new Date(elapsed);
+                    let m = String(date.getUTCMinutes()).padStart(2, '0');
+                    let s = String(date.getUTCSeconds()).padStart(2, '0');
+                    let ms = Math.floor(date.getUTCMilliseconds() / 100);
+                    document.getElementById('stopwatch-display').innerText = `${m}:${s}.${ms}`;
+                }
+                if(versusTimeLimitMin > 0 && elapsed > versusTimeLimitMin * 60000) {
+                    if(!submitBtn.disabled) document.getElementById('giveUpBtn').click();
+                }
+            }
+        }, 100);
+
         submitBtn.addEventListener("click", () => {
             let rawInput = input.value.trim();
             if (!rawInput) return;
@@ -537,11 +698,11 @@
             }
 
             let rowHTML = "";
+            let correct = (guessObj.Name === targetAns.Name);
 
             if (isHardMode) {
                 let feedback = [];
                 let props = ['Gender', 'Class', 'CCA', 'Name'];
-                
                 for (let i = 0; i < 4; i++) {
                     if (guessObj[props[i]] === targetAns[props[i]]) feedback.push("✅");
                     else feedback.push("❌");
@@ -557,16 +718,6 @@
                     </div>
                 `;
                 output.insertAdjacentHTML('beforeend', rowHTML);
-
-                if (guessObj.Name === targetAns.Name) {
-                    output.insertAdjacentHTML('beforeend', `<div class="end-msg win">winner winner chicken dinner</div>`);
-                    
-                    if (currentMode === 'versus') {
-                        if (window.submitVersusFinished) window.submitVersusFinished();
-                        output.insertAdjacentHTML('beforeend', `<div class="end-msg win" style="background-color:rgba(230,81,0,0.1); color:var(--btn-versus); border-color:var(--btn-versus);">Correct! Waiting for other players...</div>`);
-                    }
-                    endMatch(true);
-                }
             } 
             else {
                 let class_feedback = "❌";
@@ -584,7 +735,7 @@
                 if (gcount === tcount) name_feedback = "🟧";
                 else if (gcount < tcount) name_feedback = "↑";
                 else if (gcount > tcount) name_feedback = "↓";
-                if (guessObj.Name === targetAns.Name) name_feedback = "✅";
+                if (correct) name_feedback = "✅";
 
                 let cca_feedback = "❌";
                 if (guessObj.CCA === targetAns.CCA) cca_feedback = "✅";
@@ -602,24 +753,30 @@
                     </div>
                 `;
                 output.insertAdjacentHTML('beforeend', rowHTML);
+            }
 
-                if (guessObj.Name === targetAns.Name) {
-                    if (currentMode === 'daily') {
-                        let roundPoints = Math.floor(1000 / roundAttempts);
-                        totalScore += roundPoints;
-                        updateDailyHUD();
-                        output.insertAdjacentHTML('beforeend', `<div class="end-msg win">+${roundPoints} Points!</div>`);
-                        let displayAttempt = roundAttempts >= 10 ? 'X' : roundAttempts;
-                        dailyAttemptsHistory.push(displayAttempt);
-                        endMatch(true);
-                    } else if (currentMode === 'versus') {
-                        if (window.submitVersusFinished) window.submitVersusFinished();
-                        output.insertAdjacentHTML('beforeend', `<div class="end-msg win" style="background-color:rgba(230,81,0,0.1); color:var(--btn-versus); border-color:var(--btn-versus);">Correct! Waiting for other players...</div>`);
-                        endMatch(true);
-                    } else {
-                        output.insertAdjacentHTML('beforeend', `<div class="end-msg win">W fortnite</div>`);
-                        endMatch(true);
-                    }
+            if (correct) {
+                if (currentMode === 'daily') {
+                    let roundPoints = calculateStockpilePoints(roundAttempts);
+                    totalScore += roundPoints;
+                    updateDailyHUD();
+                    output.insertAdjacentHTML('beforeend', `<div class="end-msg win">+${roundPoints} Points!</div>`);
+                    let displayAttempt = roundAttempts >= 10 ? 'X' : roundAttempts;
+                    dailyAttemptsHistory.push(displayAttempt);
+                    endMatch(true);
+                } else if (currentMode === 'versus') {
+                    if (window.submitVersusFinished) window.submitVersusFinished(true);
+                    output.insertAdjacentHTML('beforeend', `<div class="end-msg win" style="background-color:rgba(230,81,0,0.1); color:var(--btn-versus); border-color:var(--btn-versus);">Correct! Waiting for other players...</div>`);
+                    endMatch(true);
+                } else {
+                    output.insertAdjacentHTML('beforeend', `<div class="end-msg win">Correct!</div>`);
+                    endMatch(true);
+                }
+            } else {
+                if (currentMode === 'versus' && versusRoomMode === 'blitz' && versusMaxLives > 0 && roundAttempts >= versusMaxLives) {
+                    if (window.submitVersusFinished) window.submitVersusFinished(false);
+                    output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">Out of lives! Waiting for others...</div>`);
+                    endMatch(false);
                 }
             }
             
@@ -642,7 +799,7 @@
                 output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">0 Points.<br><span style="font-size: 0.8em">Target: ${targetAns.Name}</span></div>`);
             } else if (currentMode === 'versus') {
                 if (window.submitVersusGiveUp) window.submitVersusGiveUp();
-                output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">Waiting for other players...<br><span style="font-size: 0.8em">Target: ${targetAns.Name}</span></div>`);
+                output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">Gave up. Waiting for others...<br><span style="font-size: 0.8em">Target: ${targetAns.Name}</span></div>`);
             } else {
                 output.insertAdjacentHTML('beforeend', `<div class="end-msg lose">Target was:<br><span style="font-size: 0.8em">${tList}</span></div>`);
             }
@@ -670,7 +827,7 @@
                     setTimeout(() => { showScoreScreen(); }, 1500);
                 }
             } else if (currentMode === 'versus') {
-                // UI waits for Firestore 'roundEnd' event
+                // UI waits for Firestore 'roundEnd' or 'summary' event
             } else {
                 resetBtn.style.display = "block";
             }
@@ -709,11 +866,9 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
         const authMessage = document.getElementById("auth-message");
         window.loggedInUsername = "";
 
-        // --- AUTHENTICATION & LOGIN ---
         function showAuthMessage(msg, type) {
             authMessage.innerText = msg;
             if (type === "error") authMessage.style.color = "#d32f2f";
@@ -726,30 +881,19 @@
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         }
 
-        // NEW: Fetch and display the top player banner
         window.updateTopPlayerBanner = async function() {
             const banner = document.getElementById("top-player-banner");
             const nameSpan = document.getElementById("top-player-name");
-            
             try {
                 const q = query(collection(db, "leaderboard"), where("date", "==", getSGTDateString()));
                 const querySnapshot = await getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    banner.style.display = "none";
-                    return;
-                }
-                
+                if (querySnapshot.empty) { banner.style.display = "none"; return; }
                 let scores = [];
                 querySnapshot.forEach((doc) => scores.push(doc.data()));
                 scores.sort((a, b) => b.score - a.score); 
-                
                 nameSpan.innerText = scores[0].username;
                 banner.style.display = "block";
-            } catch (e) {
-                console.error("Error fetching top player:", e);
-                banner.style.display = "none";
-            }
+            } catch (e) { banner.style.display = "none"; }
         };
 
         async function checkApproval(user) {
@@ -758,47 +902,32 @@
                 if (docSnap.exists() && docSnap.data().approved === true) {
                     showAuthMessage("", "");
                     window.loggedInUsername = docSnap.data().username; 
-                    
                     document.getElementById('logged-in-username-display').innerText = window.loggedInUsername;
                     document.getElementById('user-badge').style.display = "block";
-
                     document.getElementById('login-screen').classList.remove('active');
                     document.getElementById('menu-screen').classList.add('active');
-                    
-                    // Update the top player banner when they reach the menu
                     window.updateTopPlayerBanner();
                 } else {
-                    showAuthMessage("DM @deelimreal on instagram or message 83828100 on whatsapp to get your account approved", "error");
+                    showAuthMessage("DM @deelimreal to get approved", "error");
                     document.getElementById('user-badge').style.display = "none";
                     signOut(auth);
                 }
-            } catch (error) {
-                showAuthMessage("Error connecting to database.", "error");
-                document.getElementById('user-badge').style.display = "none";
-                signOut(auth);
-            }
+            } catch (error) { signOut(auth); }
         }
 
         document.getElementById("loginBtn").addEventListener("click", async () => {
             const usernameInput = document.getElementById("loginUsername").value.trim();
             const pass = document.getElementById("loginPassword").value;
             if (!usernameInput || !pass) return showAuthMessage("Please enter both.", "error");
-            showAuthMessage("Signing in...", "info");
-
             try {
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("username", "==", usernameInput));
+                const q = query(collection(db, "users"), where("username", "==", usernameInput));
                 const querySnapshot = await getDocs(q);
-
                 if (querySnapshot.empty) return showAuthMessage("Username not found.", "error");
                 let userEmail = "";
                 querySnapshot.forEach((doc) => { userEmail = doc.data().email; });
-
                 const userCredential = await signInWithEmailAndPassword(auth, userEmail, pass);
                 await checkApproval(userCredential.user);
-            } catch (error) {
-                showAuthMessage("Invalid username or password.", "error");
-            }
+            } catch (error) { showAuthMessage("Invalid username or password.", "error"); }
         });
 
         document.getElementById("signupBtn").addEventListener("click", async () => {
@@ -806,36 +935,23 @@
             const realName = document.getElementById("signupRealName").value.trim();
             const email = document.getElementById("signupEmail").value.trim();
             const pass = document.getElementById("signupPassword").value;
-
             if (!username || !realName || !email || !pass) return showAuthMessage("Fill all fields.", "error");
-            if (pass.length < 6) return showAuthMessage("Password min 6 characters.", "error");
-
-            showAuthMessage("Checking username...", "info");
-
             try {
                 const q = query(collection(db, "users"), where("username", "==", username));
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) return showAuthMessage("Username taken.", "error");
-
-                showAuthMessage("Creating account...", "info");
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                
                 await setDoc(doc(db, "users", email.toLowerCase()), {
                     email: email.toLowerCase(), username: username, realName: realName,
                     approved: false, signupDate: new Date().toISOString()
                 });
-
-                showAuthMessage("DM @deelimreal on instagram or message 83828100 on whatsapp to get your account approved", "success");
+                showAuthMessage("DM @deelimreal to get approved", "success");
                 signOut(auth);
-            } catch (error) {
-                if (error.code === 'auth/email-already-in-use') showAuthMessage("Email already registered.", "error");
-                else showAuthMessage(error.message, "error");
-            }
+            } catch (error) { showAuthMessage(error.message, "error"); }
         });
 
         onAuthStateChanged(auth, (user) => { if (user) checkApproval(user); });
 
-        // --- FULL LEADERBOARD LOGIC ---
         window.saveDailyScore = async function(score, history) {
             if (!window.loggedInUsername) return;
             try {
@@ -854,51 +970,47 @@
             try {
                 const q = query(collection(db, "leaderboard"), where("date", "==", getSGTDateString()));
                 const querySnapshot = await getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    listDiv.innerHTML = "<div style='text-align:center; color: var(--text-muted);'>No scores yet today. Be the first!</div>";
-                    return;
-                }
-                
+                if (querySnapshot.empty) { listDiv.innerHTML = "<div style='text-align:center;'>No scores yet.</div>"; return; }
                 let scores = [];
                 querySnapshot.forEach((doc) => scores.push(doc.data()));
                 scores.sort((a, b) => b.score - a.score); 
-
                 let html = "<div style='display: flex; flex-direction: column; gap: 8px;'>";
                 let rank = 1;
-                
                 scores.forEach((data) => {
-                    let medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `<span style="display:inline-block; width:1.5em; text-align:center; font-size:0.9em; color:var(--text-muted);">#${rank}</span>`;
-                    html += `
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; align-items: center;">
-                        <span>${medal} <strong style="font-size: 1.1em; margin-left: 5px;">${data.username}</strong></span>
-                        <span style="color: var(--win-color); font-weight: bold; font-size: 1.2em;">${data.score}</span>
+                    let medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `#${rank}`;
+                    html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">
+                        <span>${medal} <strong>${data.username}</strong></span>
+                        <span style="color: var(--win-color); font-weight: bold;">${data.score}</span>
                     </div>`;
                     rank++;
                 });
                 listDiv.innerHTML = html + "</div>";
-            } catch (error) { 
-                listDiv.innerHTML = "<div style='text-align:center; color: #d32f2f;'>Could not load leaderboard. Check connection.</div>"; 
-            }
+            } catch (error) { listDiv.innerHTML = "Error loading."; }
         };
 
         // --- VERSUS MULTIPLAYER LOGIC ---
         let unsubscribeVersus = null;
         let versusRoomCode = null;
 
-        window.createVersusRoom = async function() {
+        window.createVersusRoom = async function(mode) {
             const code = Math.random().toString(36).substring(2, 6).toUpperCase();
             const roomRef = doc(db, "rooms", code);
             
             await setDoc(roomRef, {
                 host: window.loggedInUsername,
                 state: 'lobby', 
+                mode: mode,
                 round: 1,
                 difficulty: 'normal',
-                targetPoints: 3,
+                playerLimit: 4,
+                targetPoints: mode === 'stockpile' ? null : 3,
+                totalRounds: mode === 'stockpile' ? 3 : null,
+                maxLives: mode === 'blitz' ? 0 : null,
+                timeLimitMin: mode !== 'blitz' ? 0 : null,
+                winCondition: mode === 'mindseye' ? 'guesses' : null,
                 target: null,
                 winners: [],
-                players: { [window.loggedInUsername]: { score: 0, attempts: 0, finished: false, finishTime: 0 } }
+                players: { [window.loggedInUsername]: { score: 0, attempts: 0, finished: false, finishTime: 0, roundScore: 0, gotCorrect: false } }
             });
             versusRoomCode = code;
             listenToRoom();
@@ -909,13 +1021,12 @@
             if(!code) return;
             const roomRef = doc(db, "rooms", code);
             const docSnap = await getDoc(roomRef);
-            
             if (!docSnap.exists()) return alert("Room not found!");
             if (docSnap.data().state !== 'lobby') return alert("Game already started!");
-            if (Object.keys(docSnap.data().players).length >= 4) return alert("Room is full! (Max 4)");
+            if (Object.keys(docSnap.data().players).length >= docSnap.data().playerLimit) return alert("Room is full!");
             
             await updateDoc(roomRef, {
-                [`players.${window.loggedInUsername}`]: { score: 0, attempts: 0, finished: false, finishTime: 0 }
+                [`players.${window.loggedInUsername}`]: { score: 0, attempts: 0, finished: false, finishTime: 0, roundScore: 0, gotCorrect: false }
             });
             versusRoomCode = code;
             listenToRoom();
@@ -923,13 +1034,17 @@
 
         window.updateRoomSettings = async function() {
             if (!versusRoomCode) return;
-            const diffSelect = document.getElementById('lobby-difficulty').value;
-            const pointsInput = parseInt(document.getElementById('lobby-points').value) || 3;
-            
-            await updateDoc(doc(db, "rooms", versusRoomCode), {
-                difficulty: diffSelect,
-                targetPoints: pointsInput
-            });
+            let updates = {
+                playerLimit: parseInt(document.getElementById('lobby-player-limit').value) || 4,
+                difficulty: document.getElementById('lobby-difficulty').value
+            };
+            if(document.getElementById('setting-points-win').style.display !== "none") updates.targetPoints = parseInt(document.getElementById('lobby-points').value) || 3;
+            if(document.getElementById('setting-total-rounds').style.display !== "none") updates.totalRounds = parseInt(document.getElementById('lobby-total-rounds').value) || 3;
+            if(document.getElementById('setting-max-lives').style.display !== "none") updates.maxLives = parseInt(document.getElementById('lobby-max-lives').value) || 0;
+            if(document.getElementById('setting-time-limit').style.display !== "none") updates.timeLimitMin = parseInt(document.getElementById('lobby-time-limit').value) || 0;
+            if(document.getElementById('setting-win-condition').style.display !== "none") updates.winCondition = document.getElementById('lobby-win-condition').value;
+
+            await updateDoc(doc(db, "rooms", versusRoomCode), updates);
         };
 
         window.startVersusRound = async function() {
@@ -942,16 +1057,19 @@
                 newPlayers[p].attempts = 0;
                 newPlayers[p].finished = false;
                 newPlayers[p].finishTime = 0; 
+                newPlayers[p].roundScore = 0;
+                newPlayers[p].gotCorrect = false;
             }
             
             let randomTarget = cohortData[Math.floor(Math.random() * cohortData.length)];
             
             await updateDoc(roomRef, {
-                state: 'playing',
-                round: data.state === 'lobby' ? 1 : data.round + 1,
+                state: 'countdown',
+                round: (data.state === 'lobby' || data.state === 'gameOver') ? 1 : data.round + 1,
                 target: randomTarget,
                 players: newPlayers,
-                winners: []
+                winners: [],
+                roundStartTime: Date.now() + 3000
             });
         };
 
@@ -961,18 +1079,29 @@
             });
         };
 
-        window.submitVersusFinished = async function() {
-            await updateDoc(doc(db, "rooms", versusRoomCode), {
+        window.submitVersusFinished = async function(gotCorrect) {
+            let updates = {
                 [`players.${window.loggedInUsername}.finished`]: true,
-                [`players.${window.loggedInUsername}.finishTime`]: Date.now()
-            });
+                [`players.${window.loggedInUsername}.finishTime`]: Date.now(),
+                [`players.${window.loggedInUsername}.gotCorrect`]: gotCorrect
+            };
+            if(versusRoomMode === 'stockpile' && gotCorrect) {
+                updates[`players.${window.loggedInUsername}.roundScore`] = calculateStockpilePoints(roundAttempts);
+            }
+            await updateDoc(doc(db, "rooms", versusRoomCode), updates);
+
+            // If Blitz and got correct, trigger round end immediately
+            if (versusRoomMode === 'blitz' && gotCorrect) {
+                await updateDoc(doc(db, "rooms", versusRoomCode), { state: 'roundEnd', winners: [window.loggedInUsername] });
+            }
         };
 
         window.submitVersusGiveUp = async function() {
             await updateDoc(doc(db, "rooms", versusRoomCode), {
                 [`players.${window.loggedInUsername}.attempts`]: 99,
                 [`players.${window.loggedInUsername}.finished`]: true,
-                [`players.${window.loggedInUsername}.finishTime`]: Date.now()
+                [`players.${window.loggedInUsername}.finishTime`]: Date.now(),
+                [`players.${window.loggedInUsername}.gotCorrect`]: false
             });
         };
 
@@ -983,7 +1112,13 @@
             window.location.reload(); 
         };
 
-        // MAIN VERSUS SYNC LISTENER
+        function getQuoteForMode(mode) {
+            if(mode === 'blitz') return "“Take time to deliberate; but when the time for action arrives, stop thinking and go in.” — Napoleon Bonaparte";
+            if(mode === 'mindseye') return "“Details make perfection, and perfection is not a detail.” — Leonardo da Vinci";
+            if(mode === 'stockpile') return "“Act as if what you do makes a difference. It does.” — William James";
+            return "";
+        }
+
         function listenToRoom() {
             const roomRef = doc(db, "rooms", versusRoomCode);
             
@@ -997,33 +1132,66 @@
                 const isHost = (window.loggedInUsername === data.host);
 
                 versusDifficulty = data.difficulty;
-                versusTargetPoints = data.targetPoints;
+                versusRoomMode = data.mode;
+                versusMaxLives = data.maxLives || 0;
+                versusTimeLimitMin = data.timeLimitMin || 0;
                 
                 // STATE 1: LOBBY
                 if (data.state === 'lobby') {
                     window.showScreen('lobby-screen');
                     document.getElementById('lobby-code').innerText = versusRoomCode;
+                    
+                    let modeNames = {'blitz':'Blitz', 'mindseye': "Mind's Eye", 'stockpile': 'Stockpile'};
+                    document.getElementById('lobby-mode-name').innerText = modeNames[data.mode];
 
+                    document.getElementById('lobby-player-limit').value = data.playerLimit;
                     document.getElementById('lobby-difficulty').value = data.difficulty;
-                    document.getElementById('lobby-points').value = data.targetPoints;
+                    
+                    document.getElementById('setting-points-win').style.display = (data.mode !== 'stockpile') ? "flex" : "none";
+                    if(data.mode !== 'stockpile') document.getElementById('lobby-points').value = data.targetPoints;
+
+                    document.getElementById('setting-total-rounds').style.display = (data.mode === 'stockpile') ? "flex" : "none";
+                    if(data.mode === 'stockpile') document.getElementById('lobby-total-rounds').value = data.totalRounds;
+
+                    document.getElementById('setting-time-limit').style.display = (data.mode !== 'blitz') ? "flex" : "none";
+                    if(data.mode !== 'blitz') document.getElementById('lobby-time-limit').value = data.timeLimitMin;
+
+                    document.getElementById('setting-max-lives').style.display = (data.mode === 'blitz') ? "flex" : "none";
+                    if(data.mode === 'blitz') document.getElementById('lobby-max-lives').value = data.maxLives;
+
+                    document.getElementById('setting-win-condition').style.display = (data.mode === 'mindseye') ? "flex" : "none";
+                    if(data.mode === 'mindseye') document.getElementById('lobby-win-condition').value = data.winCondition;
                     
                     if (isHost) {
-                        document.getElementById('lobby-difficulty').disabled = false;
-                        document.getElementById('lobby-points').disabled = false;
+                        document.querySelectorAll('#versus-settings input, #versus-settings select').forEach(el => el.disabled = false);
                         document.getElementById('startVersusBtn').style.display = "block";
                         document.getElementById('lobby-settings-notice').style.display = "none";
                     } else {
-                        document.getElementById('lobby-difficulty').disabled = true;
-                        document.getElementById('lobby-points').disabled = true;
+                        document.querySelectorAll('#versus-settings input, #versus-settings select').forEach(el => el.disabled = true);
                         document.getElementById('startVersusBtn').style.display = "none";
                         document.getElementById('lobby-settings-notice').style.display = "block";
                     }
                     
                     let pList = "";
-                    for(let p in data.players) {
-                        pList += `<div style="padding: 5px 0;">${p} ${p === data.host ? "(Host)" : ""}</div>`;
-                    }
+                    for(let p in data.players) { pList += `<div style="padding: 5px 0;">${p} ${p === data.host ? "(Host)" : ""}</div>`; }
                     document.getElementById('lobby-players').innerHTML = pList;
+                }
+
+                // STATE 1.5: COUNTDOWN
+                if (data.state === 'countdown') {
+                    document.getElementById('countdown-overlay').style.display = "flex";
+                    document.getElementById('countdown-quote').innerText = getQuoteForMode(data.mode);
+                    
+                    let interval = setInterval(() => {
+                        let remain = data.roundStartTime - Date.now();
+                        if (remain <= 0) {
+                            clearInterval(interval);
+                            document.getElementById('countdown-overlay').style.display = "none";
+                            if (isHost) updateDoc(roomRef, { state: 'playing', roundStartTime: Date.now() });
+                        } else {
+                            document.getElementById('countdown-timer').innerText = Math.ceil(remain / 1000);
+                        }
+                    }, 100);
                 }
                 
                 // STATE 2: PLAYING
@@ -1032,6 +1200,8 @@
                         currentMode = 'versus';
                         targetAns = data.target; 
                         roundAttempts = 0;
+                        versusRoundStartTime = data.roundStartTime;
+
                         document.getElementById('output').innerHTML = "";
                         document.getElementById('guessInput').value = "";
                         document.getElementById('guessInput').disabled = false;
@@ -1043,6 +1213,9 @@
                         document.getElementById('resetBtn').style.display = "none";
                         document.getElementById('daily-header').style.display = "none";
                         document.getElementById('versus-header').style.display = "flex";
+                        
+                        if(data.mode === 'blitz') document.getElementById('stopwatch-display').style.display = "inline-block";
+                        else document.getElementById('stopwatch-display').style.display = "none";
                         
                         document.getElementById('game-title').innerText = `--- Versus Round ${data.round} ---`;
                         
@@ -1060,7 +1233,7 @@
                     
                     let hudHtml = "";
                     for(let p in data.players) {
-                        let status = data.players[p].finished ? "✅ Done" : `${data.players[p].attempts} tries`;
+                        let status = data.players[p].finished ? "✅ Done" : (data.mode === 'mindseye' ? "Playing..." : `${data.players[p].attempts} tries`);
                         hudHtml += `<div style="display:flex; justify-content:space-between;">
                             <span>${p} [${data.players[p].score} pts]</span>
                             <span>${status}</span>
@@ -1070,57 +1243,104 @@
                     
                     if (isHost) {
                         let allDone = true;
-                        let minTries = 999;
-                        for(let p in data.players) {
-                            if (!data.players[p].finished) allDone = false;
-                            if (data.players[p].attempts < minTries) minTries = data.players[p].attempts;
-                        }
+                        for(let p in data.players) { if (!data.players[p].finished) allDone = false; }
                         
-                        if (allDone) {
-                            let roundWinners = [];
+                        if (allDone && data.mode !== 'blitz') { 
                             let updatedPlayers = {...data.players};
-                            
-                            let tiedPlayers = [];
-                            for(let p in updatedPlayers) {
-                                if (updatedPlayers[p].attempts === minTries) {
-                                    tiedPlayers.push(p);
+                            let roundWinners = [];
+
+                            if (data.mode === 'stockpile') {
+                                for(let p in updatedPlayers) updatedPlayers[p].score += updatedPlayers[p].roundScore;
+                            } 
+                            else if (data.mode === 'mindseye') {
+                                let bestVal = 99999999;
+                                let cand = [];
+                                for(let p in updatedPlayers) {
+                                    if(!updatedPlayers[p].gotCorrect) continue;
+                                    let val = data.winCondition === 'time' ? updatedPlayers[p].finishTime : updatedPlayers[p].attempts;
+                                    if(val < bestVal) { bestVal = val; cand = [p]; }
+                                    else if(val === bestVal) { cand.push(p); }
+                                }
+                                if(cand.length > 1) { // Tiebreaker
+                                    cand.sort((a,b) => {
+                                        let tbA = data.winCondition === 'time' ? updatedPlayers[a].attempts : updatedPlayers[a].finishTime;
+                                        let tbB = data.winCondition === 'time' ? updatedPlayers[b].attempts : updatedPlayers[b].finishTime;
+                                        return tbA - tbB;
+                                    });
+                                }
+                                if(cand.length > 0) {
+                                    let w = cand[0];
+                                    updatedPlayers[w].score += 1;
+                                    roundWinners.push(w);
                                 }
                             }
-                            
-                            if (tiedPlayers.length > 0) {
-                                tiedPlayers.sort((a, b) => updatedPlayers[a].finishTime - updatedPlayers[b].finishTime);
-                                let tiebreakerWinner = tiedPlayers[0]; 
-                                
-                                updatedPlayers[tiebreakerWinner].score += 1; 
-                                roundWinners.push(tiebreakerWinner);
-                            }
-                            
+
                             let gameWinners = [];
-                            for(let p in updatedPlayers) {
-                                if (updatedPlayers[p].score >= data.targetPoints) gameWinners.push(p);
+                            if (data.mode === 'stockpile') {
+                                if (data.round >= data.totalRounds) {
+                                    let maxScore = -1;
+                                    for(let p in updatedPlayers) {
+                                        if(updatedPlayers[p].score > maxScore) { maxScore = updatedPlayers[p].score; gameWinners = [p]; }
+                                        else if(updatedPlayers[p].score === maxScore) { gameWinners.push(p); }
+                                    }
+                                }
+                            } else {
+                                for(let p in updatedPlayers) if (updatedPlayers[p].score >= data.targetPoints) gameWinners.push(p);
                             }
                             
                             if (gameWinners.length > 0) {
                                 updateDoc(roomRef, { state: 'gameOver', players: updatedPlayers, winners: gameWinners });
                             } else {
-                                updateDoc(roomRef, { state: 'roundEnd', players: updatedPlayers, winners: roundWinners });
+                                if (data.mode === 'mindseye') updateDoc(roomRef, { state: 'summary', players: updatedPlayers, winners: roundWinners });
+                                else updateDoc(roomRef, { state: 'roundEnd', players: updatedPlayers, winners: roundWinners });
                             }
+                        } else if (allDone && data.mode === 'blitz') {
+                            // If all out of lives or gave up in Blitz and no one won
+                            if(data.winners.length === 0) updateDoc(roomRef, { state: 'roundEnd', winners: [] });
                         }
                     }
                 }
                 
+                // STATE 2.5: SUMMARY (Mind's Eye only)
+                if (data.state === 'summary') {
+                    if (currentMode === 'versus') {
+                        currentMode = 'versus-summary';
+                        document.getElementById('summary-target-name').innerText = data.target.Name;
+                        if(data.winners.length > 0) document.getElementById('summary-winner-text').innerText = `${data.winners[0]} won the point!`;
+                        else document.getElementById('summary-winner-text').innerText = `No one got the point.`;
+
+                        let tbl = `<table><tr><th>Player</th><th>Attempts</th><th>Time (s)</th></tr>`;
+                        for(let p in data.players) {
+                            let pl = data.players[p];
+                            let timeStr = pl.gotCorrect ? ((pl.finishTime - data.roundStartTime)/1000).toFixed(1) : "-";
+                            tbl += `<tr><td>${p}</td><td>${pl.attempts}</td><td>${timeStr}</td></tr>`;
+                        }
+                        tbl += `</table>`;
+                        document.getElementById('summary-table-container').innerHTML = tbl;
+                        
+                        document.getElementById('summaryNextRoundBtn').style.display = isHost ? "block" : "none";
+                        document.getElementById('summary-waiting-text').style.display = isHost ? "none" : "block";
+
+                        window.showScreen('versus-summary-screen');
+                    }
+                }
+
                 // STATE 3: ROUND OVER
                 if (data.state === 'roundEnd') {
-                    if (currentMode === 'versus') {
+                    if (currentMode.startsWith('versus')) {
                         currentMode = 'versus-waiting'; 
-                        let winNames = data.winners.join(" & ");
-                        document.getElementById('output').insertAdjacentHTML('beforeend', `<div class="end-msg win" style="background-color: var(--win-color); color: white;">Point goes to: ${winNames}! (Fastest Time)</div>`);
+                        
+                        let winMsg = "No one got the point.";
+                        if(data.winners.length > 0) winMsg = `Point goes to: ${data.winners.join(" & ")}!`;
+                        else if (data.mode === 'stockpile') winMsg = "Round Over! Points added.";
+
+                        document.getElementById('output').insertAdjacentHTML('beforeend', `<div class="end-msg win" style="background-color: var(--win-color); color: white;">${winMsg}</div>`);
                         
                         document.getElementById('guessInput').disabled = true;
                         document.getElementById('submitBtn').disabled = true;
                         document.getElementById('giveUpBtn').disabled = true;
                         
-                        if (isHost) {
+                        if (isHost && data.mode !== 'mindseye') {
                             document.getElementById('nextVersusRoundBtn').style.display = "block";
                         }
                     }
