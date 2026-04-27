@@ -223,7 +223,7 @@
     <div id="login-screen" class="screen active">
         <h1 style="font-size: 2.5em; margin-bottom: 0px;">TJuddle</h1>
         <p style="margin-top: 0px; margin-bottom: 25px; font-weight: bold;">Where Everybody Knows Your Name</p>
-        <p style="margin-bottom: 25px; color: var(--text-muted); font-size: 1.1em;">Please sign in or create an account to play.</p>
+        <p style="margin-bottom: 25px; color: var(--text-muted); font-size: 1.1em;">Please sign in or create an account to play. Accounts are manually approved.</p>
         
         <div id="login-form" style="max-width: 350px; margin: 0 auto;">
             <input type="text" id="loginUsername" placeholder="Username" style="margin-bottom: 10px; text-align: center;">
@@ -249,7 +249,7 @@
 
     <div id="menu-screen" class="screen">
         <h1 style="margin-bottom: 0px;">TJuddle</h1>
-        <p style="margin-top: 0px; margin-bottom: 25px; font-weight: bold;">Where Everybody Knows Your Name</p>
+        <p style="margin-top: 0px; margin-bottom: 25px; font-weight: bold;">Today's Message: "I hate H1 Econs" - Dwayne</p>
         <p>made by Dwayne 05/25 </p>
         
         <div id="top-player-banner" style="display: none;">
@@ -261,7 +261,7 @@
         
         <button id="dailyBtn" class="diff-btn btn-daily" onclick="startGame('daily')">
             TJ Dailies
-            <small>5 Rounds • SGT 12:00am Reset • Global Daily Target</small>
+            <small>5 Rounds</small>
         </button>
 
         <button class="diff-btn btn-versus" onclick="showScreen('versus-menu-screen')">
@@ -274,7 +274,7 @@
         </button>
 
         <button id="leaderboardBtn" class="diff-btn btn-normal" style="background-color: #0288d1; margin-top: 5px; padding: 10px;" onclick="openFullLeaderboard()">
-            Daily Leaderboard
+            TJ Dailies Leaderboard
         </button>
 
         <hr style="border-color: var(--border-color); margin: 30px auto; width: 80%; max-width: 300px;">
@@ -321,15 +321,15 @@
         <h2 style="color: var(--btn-versus);">Select Game Mode</h2>
         <button class="diff-btn btn-versus" onclick="createVersusRoom('blitz')">
             Blitz
-            <small>Winner by least time. First to answer ends the round.</small>
+            <small>Speed is King.</small>
         </button>
         <button class="diff-btn btn-daily" onclick="createVersusRoom('mindseye')">
             Mind's Eye
-            <small>Attempts are hidden. Details shown at end of round.</small>
+            <small>Act with Intention.</small>
         </button>
         <button class="diff-btn btn-normal" style="background-color: #0288d1;" onclick="createVersusRoom('stockpile')">
             Stockpile
-            <small>Accumulate points over set rounds.</small>
+            <small>Every Choice Matters.</small>
         </button>
         <button class="btn-action btn-giveup" style="width:100%; max-width:300px; margin-top:20px;" onclick="showScreen('versus-menu-screen')">Back</button>
     </div>
@@ -900,7 +900,7 @@
                     document.getElementById('menu-screen').classList.add('active');
                     window.updateTopPlayerBanner();
                 } else {
-                    showAuthMessage("DM @deelimreal to get approved", "error");
+                    showAuthMessage("DM @deelimreal on Instagram or message 83828100 on Whatsapp to get approved, do not make another account.", "error");
                     document.getElementById('user-badge').style.display = "none";
                     signOut(auth);
                 }
@@ -937,7 +937,7 @@
                     email: email.toLowerCase(), username: username, realName: realName,
                     approved: false, signupDate: new Date().toISOString()
                 });
-                showAuthMessage("DM @deelimreal to get approved", "success");
+                showAuthMessage("DM @deelimreal on Instagram or message 83828100 on Whatsapp to get approved, do not make another account.", "success");
                 signOut(auth);
             } catch (error) { showAuthMessage(error.message, "error"); }
         });
