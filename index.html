@@ -546,21 +546,45 @@
 
         function generateDailyTargets() {
             let dateStr = getSGTDateString();
-            let hash = 0;
+            
+            // 1. Create the GLOBAL SEED (Same for everyone today)
+            let globalSeed = 0;
             for (let i = 0; i < dateStr.length; i++) {
-                hash = (hash << 5) - hash + dateStr.charCodeAt(i);
-                hash |= 0;
+                globalSeed = (globalSeed << 5) - globalSeed + dateStr.charCodeAt(i);
+                globalSeed |= 0;
             }
-            let targets = [];
-            let seed = hash;
-            let available = [...cohortData]; 
-            for(let i=0; i<5; i++) {
-                seed++;
-                let rnd = seededRandom(seed);
-                let idx = Math.floor(rnd * available.length);
-                targets.push(available.splice(idx, 1)[0]);
+        
+            // 2. Select the 5 students globally (Fisher-Yates on a clone)
+            let pool = [...cohortData];
+            let dailySelection = [];
+            let selectionSeed = globalSeed;
+        
+            for (let i = 0; i < 5; i++) {
+                selectionSeed++; 
+                let rnd = seededRandom(selectionSeed);
+                let idx = Math.floor(rnd * pool.length);
+                dailySelection.push(pool.splice(idx, 1)[0]);
             }
-            return targets.sort(() => Math.random() - 0.5);
+        
+            // 3. Create a PERSONAL SEED (Unique to this user)
+            // We use the Username + Date so the order is consistent for the user 
+            // even if they refresh, but different from other players.
+            let personalStr = dateStr + (window.loggedInUsername || "");
+            let personalSeed = 0;
+            for (let i = 0; i < personalStr.length; i++) {
+                personalSeed = (personalSeed << 5) - personalSeed + personalStr.charCodeAt(i);
+                personalSeed |= 0;
+            }
+        
+            // 4. Shuffle the 5 selected students specifically for this user
+            for (let i = dailySelection.length - 1; i > 0; i--) {
+                personalSeed++;
+                let rnd = seededRandom(personalSeed);
+                let j = Math.floor(rnd * (i + 1));
+                [dailySelection[i], dailySelection[j]] = [dailySelection[j], dailySelection[i]];
+            }
+        
+            return dailySelection;
         }
 
         function setupMenuButtons() {
