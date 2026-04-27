@@ -951,21 +951,51 @@
             const realName = document.getElementById("signupRealName").value.trim();
             const email = document.getElementById("signupEmail").value.trim();
             const pass = document.getElementById("signupPassword").value;
+        
+            // 1. Check for 10-minute lockout
+            const lastSignup = localStorage.getItem("tjdle_last_signup_timestamp");
+            const now = Date.now();
+            const lockoutPeriod = 10 * 60 * 1000; // 10 minutes in milliseconds
+        
+            if (lastSignup && (now - parseInt(lastSignup)) < lockoutPeriod) {
+                const remaining = Math.ceil((lockoutPeriod - (now - parseInt(lastSignup))) / 60000);
+                return showAuthMessage(`Please wait ${remaining} more minute(s) before creating another account.`, "error");
+            }
+        
             if (!username || !realName || !email || !pass) return showAuthMessage("Fill all fields.", "error");
+            
             try {
                 const q = query(collection(db, "users"), where("username", "==", username));
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) return showAuthMessage("Username taken.", "error");
+        
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                
+                // 2. Save user to Firestore
                 await setDoc(doc(db, "users", email.toLowerCase()), {
-                    email: email.toLowerCase(), username: username, realName: realName,
-                    approved: false, signupDate: new Date().toISOString()
+                    email: email.toLowerCase(), 
+                    username: username, 
+                    realName: realName,
+                    approved: false, 
+                    signupDate: new Date().toISOString()
                 });
-                showAuthMessage("DM @deelimreal on Instagram or message 83828100 on Whatsapp to get approved, do not make another account.", "success");
-                signOut(auth);
-            } catch (error) { showAuthMessage(error.message, "error"); }
+        
+                // 3. Set the lockout timestamp in the user's browser
+                localStorage.setItem("tjdle_last_signup_timestamp", Date.now().toString());
+        
+                // 4. Show success, sign out, and redirect to Login
+                showAuthMessage("Account created! Redirecting to login...", "success");
+                
+                setTimeout(() => {
+                    signOut(auth);
+                    window.toggleAuthMode('login'); // Send back to login screen
+                    showAuthMessage("Account created. DM @deelimreal or message 83828100 to get approved.", "success");
+                }, 2000);
+        
+            } catch (error) { 
+                showAuthMessage(error.message, "error"); 
+            }
         });
-
         onAuthStateChanged(auth, (user) => { if (user) checkApproval(user); });
 
         window.saveDailyScore = async function(score, history) {
